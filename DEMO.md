@@ -162,7 +162,7 @@ Now the tag icon on a product → **Sign a discount** → 20% → **Sign offer**
 
 > "Consent is captured once, at reserve authorization. Autonomous spend happens
 > inside RBI's own e-mandate lane. Anything larger, out of scope, expired or
-> revoked is refused — and 85 tests prove the refusals, not just the happy path."
+> revoked is refused — and 94 tests prove the refusals, not just the happy path."
 
 Optionally show the terminal:
 

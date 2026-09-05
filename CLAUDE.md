@@ -50,7 +50,7 @@ venv\Scripts\python.exe -m commerce_platform.seed --reset                       
 venv\Scripts\python.exe -m agent.run                                                     # the ADK agent REPL
 venv\Scripts\python.exe tests\test_registry.py                                           # 23 checks
 venv\Scripts\python.exe tests\test_passport_live.py                                      # 5 checks
-venv\Scripts\python.exe tests\test_collect.py                                            # 11 checks
+venv\Scripts\python.exe tests\test_collect.py                                            # 20 checks
 venv\Scripts\python.exe tests\test_scoping.py                                            # 17 checks
 venv\Scripts\python.exe tests\test_guardrails.py                                         # 29 checks
 ```
