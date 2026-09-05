@@ -262,6 +262,15 @@ Calls from this machine intermittently die with `WinError 10053` / 504. That is 
 The runner retries, then degrades to a deterministic planner **and says so in the transcript** —
 never let it pass a for-loop's choice off as the model's.
 
+## Repo
+
+`https://github.com/dev2468/agent-commerce` (**private** — flip with
+`gh repo edit --visibility public --accept-visibility-change-consequences`).
+
+`.gitignore` excludes `data/*.key`. **`data/registry_ed25519.key` is the registry's private
+signing key — the root of trust for every passport.** Publishing it lets anyone mint a passport
+that verifies. It was one `git add -A` away from being committed; check before you stage.
+
 ## Known open issues
 
 Do not spend a session rediscovering these.
@@ -278,6 +287,10 @@ Do not spend a session rediscovering these.
   path itself is still un-demoed.
 - **The reserve→merchant transfer is a local ledger move.** In production this is Razorpay Route
   splitting the debit to the merchant's linked account. Say "modelled", not "integrated".
+- **Merchant onboarding still has cosmetic fields**: settlement cycle, accepted methods, returns
+  window and auto-accept are stored but never enforced, and `razorpay_account` is never validated
+  or used. Razorpay **Route** is the missing real piece — it would make the merchant a linked
+  account rather than a row in our ledger.
 - **The UPI/Card choice on the funding step is cosmetic** — both load the reserve identically.
   Real Reserve Pay is a UPI-PIN hold; card is there to make the step feel like a real checkout.
 - **`db.update_merchant` has no caller.** Left in as a plausible CRUD helper; it is not load-bearing.
