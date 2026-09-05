@@ -1,0 +1,144 @@
+<title>Pay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/theme.css">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<style>
+.wrap{min-height:100vh;display:grid;place-items:center;padding:24px}
+.card{width:100%;max-width:400px;padding:30px 26px;border-radius:var(--r-xl);text-align:center;
+  background:var(--glass);border:1px solid var(--glass-line);box-shadow:var(--shadow-lg);
+  backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%)}
+.mark{width:54px;height:54px;border-radius:16px;margin:0 auto 16px;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(140deg,var(--brand-soft),var(--brand) 45%,var(--brand-deep));
+  box-shadow:0 10px 24px -8px var(--brand)}
+.mark.ok{background:linear-gradient(140deg,var(--ok),#0AA97C)}
+.mark.bad{background:linear-gradient(140deg,var(--bad),#C0392B)}
+h1{font-family:var(--f-disp);font-size:19px;font-weight:800;letter-spacing:-.03em;margin-bottom:5px}
+.sub{font-size:13px;color:var(--ink-3);margin-bottom:20px}
+.amt{font-family:var(--f-disp);font-size:40px;font-weight:800;letter-spacing:-.04em;line-height:1;
+  font-variant-numeric:tabular-nums;margin-bottom:6px;
+  background:linear-gradient(120deg,var(--brand),var(--indigo));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.for{font-size:13px;color:var(--ink-2);margin-bottom:3px;font-weight:600}
+.mer{font-size:12px;color:var(--ink-4);margin-bottom:22px}
+.ids{margin-top:18px;padding-top:16px;border-top:1px solid var(--glass-line);
+  font-family:var(--f-mono);font-size:10.5px;color:var(--ink-4);line-height:1.7;word-break:break-all}
+.note{margin-top:16px;padding:11px 13px;border-radius:var(--r-md);background:var(--tint);
+  border:1px solid var(--glass-edge);font-size:11.5px;color:var(--ink-2);text-align:left}
+.note b{font-family:var(--f-disp)}
+.note code{font-family:var(--f-mono);font-size:10.5px;white-space:nowrap;padding:1px 5px;
+  border-radius:5px;background:var(--glass-2);border:1px solid var(--glass-line)}
+</style>
+
+<div class="field"></div>
+<div class="orb orb-1"></div><div class="orb orb-2"></div>
+<div class="grain"></div>
+
+<div class="wrap"><div class="card" id="card">
+  <div class="mark" id="mark"><span class="spin" style="border-color:rgba(255,255,255,.4);border-top-color:#fff"></span></div>
+  <h1 id="title">Loading…</h1>
+  <p class="sub" id="sub">Fetching this order from Razorpay</p>
+  <div id="body" hidden>
+    <div class="amt" id="amt">₹0</div>
+    <div class="for" id="for"></div>
+    <div class="mer" id="mer"></div>
+    <button class="btn b-primary" id="btn" style="width:100%">Pay with UPI</button>
+    <div class="note"><b>Test mode.</b> Pay with UPI id <code>success@razorpay</code> to simulate success, or <code>failure@razorpay</code> to fail one.</div>
+    <div class="ids" id="ids"></div>
+  </div>
+</div></div>
+
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  // /pay/ord_xxx — the order id is the last path segment.
+  const orderId = decodeURIComponent(location.pathname.split('/').filter(Boolean).pop() || '');
+
+  function show(state, title, sub) {
+    $('mark').className = 'mark' + (state ? ' ' + state : '');
+    $('mark').innerHTML = state === 'ok'
+      ? '<svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      : state === 'bad'
+      ? '<svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M7 7l10 10M17 7L7 17" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>'
+      : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M3 10h18" stroke="currentColor" stroke-width="2"/></svg>';
+    $('title').textContent = title;
+    $('sub').textContent = sub || '';
+  }
+
+  async function load() {
+    let cfg;
+    try {
+      const r = await fetch('/api/orders/' + encodeURIComponent(orderId) + '/checkout');
+      cfg = await r.json();
+      if (!r.ok) throw new Error(cfg.detail || 'Could not load this order.');
+    } catch (e) { show('bad', 'Cannot load this order', e.message); return; }
+
+    if (cfg.already_paid) {
+      show('ok', 'Already paid', cfg.product + ' · ' + cfg.amount_display);
+      return;
+    }
+    show('', 'Complete your payment', 'Razorpay Checkout · real UPI');
+    $('body').hidden = false;
+    $('amt').textContent = cfg.amount_display;
+    $('for').textContent = cfg.product;
+    $('mer').textContent = cfg.merchant_name ? 'to ' + cfg.merchant_name : '';
+    $('ids').innerHTML = 'order &nbsp;' + esc(cfg.local_order_id) +
+                         '<br>razorpay &nbsp;' + esc(cfg.order_id);
+
+    $('btn').addEventListener('click', () => {
+      const rzp = new Razorpay({
+        key: cfg.key_id,
+        order_id: cfg.order_id,
+        amount: cfg.amount,
+        currency: cfg.currency,
+        name: cfg.name,
+        description: cfg.description,
+        prefill: cfg.prefill,
+        theme: { color: '#2D81F7' },
+        handler: verify,
+        modal: { ondismiss: () => { $('btn').disabled = false; $('btn').textContent = 'Pay with UPI'; } },
+      });
+      rzp.on('payment.failed', r => {
+        show('bad', 'Payment failed', (r.error && r.error.description) || 'Try again.');
+        $('btn').disabled = false; $('btn').textContent = 'Try again';
+      });
+      $('btn').disabled = true; $('btn').textContent = 'Opening Razorpay…';
+      rzp.open();
+    });
+  }
+
+  async function verify(resp) {
+    show('', 'Verifying…', 'Checking the signature on our server');
+    $('body').hidden = true;
+    try {
+      // The browser is not trusted: the server re-checks the HMAC and reads the
+      // payment back from Razorpay before any money moves in the ledger.
+      const r = await fetch('/api/orders/' + encodeURIComponent(orderId) + '/verify-payment', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          razorpay_payment_id: resp.razorpay_payment_id,
+          razorpay_order_id: resp.razorpay_order_id,
+          razorpay_signature: resp.razorpay_signature,
+        })
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.detail || 'Verification failed.');
+      show('ok', 'Paid', d.amount_display + ' · settled to ' + (d.merchant || 'the merchant'));
+      $('body').hidden = false;
+      $('btn').style.display = 'none';
+      $('ids').innerHTML = 'payment &nbsp;' + esc(d.payment_id || '') +
+        (d.payer_vpa ? '<br>from &nbsp;' + esc(d.payer_vpa) : '') +
+        (d.method ? '<br>method &nbsp;' + esc(d.method) : '');
+    } catch (e) {
+      show('bad', 'Could not verify', e.message);
+    }
+  }
+
+  if (!orderId || orderId === 'pay') show('bad', 'No order', 'This link is missing an order id.');
+  else load();
+})();
+</script>

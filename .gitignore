@@ -1,0 +1,17 @@
+venv/
+__pycache__/
+*.pyc
+.env
+.idea/
+.vscode/
+
+# Local state, never committed.
+# registry_ed25519.key is the registry's PRIVATE signing key — the root of trust
+# for every Agent Passport. Publishing it would let anyone mint a passport that
+# verifies, which is the whole security model gone. Same for merchant offer keys,
+# which live inside the database file.
+data/*.key
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/*.backup-*

@@ -1,0 +1,133 @@
+[
+  {
+    "name": "Reliance Digital",
+    "category": "electronics",
+    "description": "India's largest electronics retail chain with 10,000+ products across 800+ stores",
+    "website": "https://www.reliancedigital.in",
+    "razorpay_account": "acc_test_reliance",
+    "rating": 4.3,
+    "products": [
+      {
+        "name": "Samsung Crystal 4K 65\" Smart TV",
+        "description": "65 inch Crystal 4K UHD Smart TV with Crystal Processor 4K, HDR, Smart Hub",
+        "category": "electronics.televisions",
+        "price": 3899000,
+        "attributes": {"brand": "Samsung", "screen_size": "65 inch", "resolution": "4K UHD", "warranty": "1 year", "smart_tv": true}
+      },
+      {
+        "name": "LG UR7500 55\" 4K Smart TV",
+        "description": "55 inch 4K UHD Smart TV with WebOS, ThinQ AI, Magic Remote",
+        "category": "electronics.televisions",
+        "price": 3499000,
+        "attributes": {"brand": "LG", "screen_size": "55 inch", "resolution": "4K UHD", "warranty": "1 year", "smart_tv": true}
+      },
+      {
+        "name": "Sony WH-1000XM5 Headphones",
+        "description": "Industry-leading noise cancellation, 30hr battery, multipoint connection",
+        "category": "electronics.audio",
+        "price": 2499000,
+        "attributes": {"brand": "Sony", "type": "Over-ear", "noise_cancellation": true, "battery_life": "30 hours"}
+      },
+      {
+        "name": "Apple MacBook Air M3 13\"",
+        "description": "M3 chip, 8GB RAM, 256GB SSD, 15hr battery, Liquid Retina display",
+        "category": "electronics.laptops",
+        "price": 10999000,
+        "attributes": {"brand": "Apple", "processor": "M3", "ram": "8GB", "storage": "256GB SSD", "screen_size": "13.6 inch"}
+      }
+    ]
+  },
+  {
+    "name": "Croma",
+    "category": "electronics",
+    "description": "Tata Group electronics retailer with curated tech products and services",
+    "website": "https://www.croma.com",
+    "razorpay_account": "acc_test_croma",
+    "rating": 4.1,
+    "products": [
+      {
+        "name": "TCL 65\" 4K Google TV",
+        "description": "65 inch 4K UHD Google TV with Dolby Vision, HDR10+, Game Master",
+        "category": "electronics.televisions",
+        "price": 3299000,
+        "attributes": {"brand": "TCL", "screen_size": "65 inch", "resolution": "4K UHD", "warranty": "2 years", "smart_tv": true}
+      },
+      {
+        "name": "Samsung Galaxy S24 Ultra",
+        "description": "6.8\" Dynamic AMOLED, Snapdragon 8 Gen 3, 200MP camera, S Pen",
+        "category": "electronics.smartphones",
+        "price": 12999900,
+        "attributes": {"brand": "Samsung", "screen_size": "6.8 inch", "storage": "256GB", "ram": "12GB", "camera": "200MP"}
+      },
+      {
+        "name": "JBL Flip 6 Bluetooth Speaker",
+        "description": "Portable waterproof speaker, 12hr playtime, IP67 rated",
+        "category": "electronics.audio",
+        "price": 899900,
+        "attributes": {"brand": "JBL", "type": "Portable", "waterproof": true, "battery_life": "12 hours"}
+      }
+    ]
+  },
+  {
+    "name": "Nykaa",
+    "category": "beauty",
+    "description": "India's leading beauty and personal care platform with 4,500+ brands",
+    "website": "https://www.nykaa.com",
+    "razorpay_account": "acc_test_nykaa",
+    "rating": 4.4,
+    "products": [
+      {
+        "name": "Maybelline Fit Me Foundation",
+        "description": "Matte + Poreless liquid foundation, oil-free, natural finish",
+        "category": "beauty.makeup",
+        "price": 54900,
+        "attributes": {"brand": "Maybelline", "type": "Liquid Foundation", "finish": "Matte", "spf": "22"}
+      },
+      {
+        "name": "The Ordinary Niacinamide 10% + Zinc 1%",
+        "description": "High-strength vitamin and mineral blemish formula, 30ml",
+        "category": "beauty.skincare",
+        "price": 59000,
+        "attributes": {"brand": "The Ordinary", "type": "Serum", "size": "30ml", "skin_concern": "blemishes"}
+      },
+      {
+        "name": "Forest Essentials Kumkumadi Face Oil",
+        "description": "Ayurvedic night beauty elixir with saffron, 30ml",
+        "category": "beauty.skincare",
+        "price": 199500,
+        "attributes": {"brand": "Forest Essentials", "type": "Face Oil", "size": "30ml", "ingredient": "Saffron"}
+      }
+    ]
+  },
+  {
+    "name": "Decathlon India",
+    "category": "sports",
+    "description": "World's largest sporting goods retailer with 100+ stores in India",
+    "website": "https://www.decathlon.in",
+    "razorpay_account": "acc_test_decathlon",
+    "rating": 4.5,
+    "products": [
+      {
+        "name": "Domyos 10kg Dumbbell Kit",
+        "description": "Adjustable dumbbell set with carry case, cast iron plates",
+        "category": "sports.fitness",
+        "price": 199900,
+        "attributes": {"brand": "Domyos", "weight": "10kg", "type": "Adjustable", "material": "Cast Iron"}
+      },
+      {
+        "name": "Quechua MH500 Hiking Backpack 30L",
+        "description": "Lightweight hiking backpack with rain cover, ventilated back panel",
+        "category": "sports.outdoor",
+        "price": 299900,
+        "attributes": {"brand": "Quechua", "capacity": "30L", "waterproof": true, "weight": "1.1kg"}
+      },
+      {
+        "name": "Kiprun KS900 Running Shoes",
+        "description": "Carbon plate running shoes with PEBAX foam, 235g",
+        "category": "sports.footwear",
+        "price": 1299900,
+        "attributes": {"brand": "Kiprun", "type": "Running", "weight": "235g", "carbon_plate": true}
+      }
+    ]
+  }
+]

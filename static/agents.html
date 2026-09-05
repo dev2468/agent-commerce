@@ -1,0 +1,420 @@
+<title>Register Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/theme.css">
+
+<style>
+.page{max-width:760px;margin:0 auto;padding:44px 24px 90px}
+.mandate-read{display:flex;align-items:baseline;gap:8px;margin:2px 0 6px}
+.mandate-read b{font-family:var(--f-disp);font-size:26px;font-weight:800;letter-spacing:-.03em;color:var(--brand);font-variant-numeric:tabular-nums}
+.mandate-read span{font-size:12.5px;color:var(--ink-3)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;outline:none;
+  background:linear-gradient(90deg,var(--brand) var(--pct,30%),var(--glass-3) var(--pct,30%));margin:10px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;
+  border:3px solid var(--brand);cursor:pointer;box-shadow:var(--shadow-sm);transition:transform .2s var(--spring)}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+
+/* Signed-in reserve strip */
+.res-strip{display:flex;align-items:center;gap:13px;padding:14px 16px;border-radius:var(--r-lg);
+  background:var(--tint);border:1px solid var(--glass-edge);margin-bottom:18px;animation:up .35s var(--ease)}
+.res-ic{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(140deg,var(--brand-soft),var(--brand) 45%,var(--brand-deep));box-shadow:0 6px 16px -6px var(--brand)}
+.res-body{flex:1;min-width:0}
+.res-body b{display:block;font-family:var(--f-disp);font-size:13.5px;font-weight:700}
+.res-body span{display:block;font-size:11.5px;color:var(--ink-3)}
+.res-bal{font-family:var(--f-disp);font-size:18px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--brand)}
+
+/* Passport summary */
+.pp-card{border-radius:var(--r-lg);padding:17px;background:var(--glass-2);border:1px solid var(--glass-line);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);margin-bottom:14px;animation:up .45s var(--ease) both}
+.pp-head{display:flex;align-items:center;gap:9px;margin-bottom:13px}
+.pp-seal{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(140deg,var(--ok),#0AA97C);box-shadow:0 5px 14px -6px var(--ok)}
+.pp-head b{font-family:var(--f-disp);font-size:13.5px;font-weight:800}
+.pp-head span{font-size:11px;color:var(--ink-4);display:block}
+.pp-rows{display:flex;flex-direction:column}
+.pp-row{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid var(--glass-line);font-size:12.5px}
+.pp-row:last-child{border-bottom:none}
+.pp-row dt{color:var(--ink-4);font-weight:600}
+.pp-row dd{font-family:var(--f-disp);font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.pp-row dd.mono{font-family:var(--f-mono);font-weight:500;font-size:11px}
+.pp-scope{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.pp-scope span{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--tint);color:var(--brand)}
+</style>
+
+<div class="field"></div>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+<div class="grain"></div>
+
+<nav class="nav">
+  <div class="nav-glass">
+    <a class="brand" href="/">
+      <span class="brand-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4-4 4 4M4 10l4 4 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Agent Commerce
+    </a>
+    <div class="nav-links">
+      <a href="/wallet">Reserve</a>
+      <a href="/agents" class="active">Agents</a>
+      <a href="/merchants">Merchants</a>
+      <a href="/verify">Verify</a>
+    </div>
+  </div>
+</nav>
+
+<main class="page">
+  <header class="head">
+    <span class="eyebrow"><span class="pulse"></span>Agent Registry</span>
+    <h1>Give your code an <em>Agent Passport</em></h1>
+    <p>Sign in to a reserve you already authorized, set what the agent may spend, and get a signed passport plus API credentials.</p>
+  </header>
+
+  <section class="shell">
+    <div class="rail">
+      <div class="rail-track"><div class="rail-fill" id="rail-fill"></div></div>
+      <div class="rail-steps" id="rail-steps"></div>
+    </div>
+
+    <!-- 0 · Reserve sign-in -->
+    <div class="step active" id="step-0">
+      <div class="sh"><h2>Sign in to your reserve</h2><p>An agent always draws from a reserve — that's where its authority comes from.</p></div>
+      <div class="fg"><div class="float">
+        <input type="text" id="res-id" placeholder=" ">
+        <label for="res-id">Reserve ID or email</label>
+      </div><span class="err" id="res-id-err"></span></div>
+      <div class="fg"><div class="float">
+        <input type="password" id="res-secret" placeholder=" ">
+        <label for="res-secret">Reserve secret</label>
+      </div><span class="err" id="res-secret-err"></span></div>
+      <p class="hint">No reserve yet? <a href="/wallet" style="color:var(--brand);font-weight:600;text-decoration:none">Authorize one first</a> — it takes a minute.</p>
+    </div>
+
+    <!-- 1 · Agent + mandate -->
+    <div class="step" id="step-1">
+      <div class="sh"><h2>What may this agent do?</h2><p>These bounds are signed into the passport and enforced on every purchase.</p></div>
+      <div class="res-strip" id="res-strip">
+        <span class="res-ic"><svg width="19" height="19" viewBox="0 0 20 20" fill="none"><rect x="2.5" y="5" width="15" height="11" rx="2.4" stroke="currentColor" stroke-width="1.7"/><path d="M2.5 8.5h15" stroke="currentColor" stroke-width="1.7"/></svg></span>
+        <span class="res-body"><b id="res-name">—</b><span id="res-vpa">—</span></span>
+        <span class="res-bal" id="res-bal">—</span>
+      </div>
+
+      <div class="fg"><div class="float">
+        <input type="text" id="agent-name" placeholder=" ">
+        <label for="agent-name">Agent label</label>
+      </div><span class="err" id="agent-name-err"></span></div>
+
+      <div class="fg"><div class="float">
+        <select id="framework">
+          <option value="" disabled selected></option>
+          <option value="google-adk">Google ADK</option>
+          <option value="langchain">LangChain</option>
+          <option value="crewai">CrewAI</option>
+          <option value="anthropic-sdk">Anthropic SDK</option>
+          <option value="custom">Custom / Other</option>
+        </select>
+        <label for="framework">Agent framework</label>
+        <span class="caret"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div>
+      <p class="hint">We tailor the quickstart snippet to this.</p>
+      <span class="err" id="framework-err"></span></div>
+
+      <hr class="rule">
+      <div class="fg">
+        <label class="lb">Spend cap, per purchase</label>
+        <div class="mandate-read"><b id="mandate-val">₹5,000</b><span>signed into the passport</span></div>
+        <input type="range" id="mandate" min="500" max="15000" step="500" value="5000">
+        <p class="hint">RBI caps the no-AFA e-mandate lane at ₹15,000 per transaction — the registry refuses anything above it.</p>
+      </div>
+
+      <div class="fg" style="margin-bottom:0">
+        <label class="lb">Category scope</label>
+        <p class="hint" style="margin:-4px 0 10px">Leave all off to allow every category.</p>
+        <div class="pills" id="cats"></div>
+      </div>
+
+      <div class="pnote live">
+        <span class="pnote-ico"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><span class="pnote-lb">Signed, not stored-and-trusted</span>
+          <p>The passport is Ed25519-signed. A merchant verifies it against the registry's public key without calling us, and the gate re-checks the signature on every purchase — editing the cap in a database is refused.</p></div>
+      </div>
+    </div>
+
+    <!-- 2 · Done -->
+    <div class="step" id="step-2">
+      <div class="done-hero">
+        <div class="burst"><span class="burst-ring"></span><span class="burst-ring"></span>
+          <span class="burst-core"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <h2>Agent registered</h2>
+        <p>Its passport is signed and active. Save the secret — it's shown once.</p>
+      </div>
+
+      <div class="pp-card" id="pp-card">
+        <div class="pp-head">
+          <span class="pp-seal"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1.5l6 2.4v3.9c0 3.5-2.5 6.6-6 7.7-3.5-1.1-6-4.2-6-7.7V3.9L9 1.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.4 8.8l1.8 1.8 3.4-3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <div><b>Agent Passport</b><span id="pp-id">—</span></div>
+        </div>
+        <dl class="pp-rows" id="pp-rows"></dl>
+      </div>
+
+      <div class="cred"><div class="cred-top"><span class="cred-lb">Agent ID</span><div class="cred-acts"><button class="ib" data-copy="d-aid" title="Copy"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="5.2" y="5.2" width="8" height="8" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M3 10.6V3.6A.6.6 0 013.6 3h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></div></div><div class="cred-val" id="d-aid">&mdash;</div></div>
+      <div class="cred"><div class="cred-top"><span class="cred-lb">Agent Secret</span><div class="cred-acts"><button class="ib" id="d-reveal" title="Reveal"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M1.5 8s2.5-4.6 6.5-4.6S14.5 8 14.5 8s-2.5 4.6-6.5 4.6S1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.35"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.35"/></svg></button><button class="ib" data-copy="d-sec" title="Copy"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="5.2" y="5.2" width="8" height="8" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M3 10.6V3.6A.6.6 0 013.6 3h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></div></div><div class="cred-val" id="d-sec">&mdash;</div></div>
+
+      <div class="note"><svg width="17" height="17" viewBox="0 0 18 18" fill="none"><path d="M9 1.8L1.6 15.2h14.8L9 1.8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 6.8v3.4M9 12.6v.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><p><b>Copy the secret now.</b> Only its hash is stored — it cannot be shown again.</p></div>
+
+      <div class="sect"><span class="sect-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5.5 4L2 8l3.5 4M10.5 4L14 8l-3.5 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><h3>Wire it up<small>Live calls against this gateway</small></h3></div></div>
+      <div class="tabs"><button class="tab on" data-tab="py">Python</button><button class="tab" data-tab="adk">Google ADK</button></div>
+      <div class="code">
+        <button class="ib" id="btn-copy-code" title="Copy code"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="5.2" y="5.2" width="8" height="8" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M3 10.6V3.6A.6.6 0 013.6 3h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+        <div class="pane on" id="pane-py"><pre id="code-py"></pre></div>
+        <div class="pane" id="pane-adk"><pre id="code-adk"></pre></div>
+      </div>
+      <div class="done-foot">
+        <a class="btn b-glass" href="/verify">Verify this passport</a>
+        <a class="btn b-primary" href="/upi">Open UPI app</a>
+      </div>
+    </div>
+
+    <div class="foot" id="foot">
+      <button class="btn b-quiet" id="btn-back" style="visibility:hidden"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3.5L5.5 8l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button>
+      <button class="btn b-primary" id="btn-next"><span id="btn-next-lb">Sign in</span><svg width="15" height="15" viewBox="0 0 16 16" fill="none" id="btn-next-ic"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="toast-msg"></span></div>
+
+<script>
+(function () {
+  'use strict';
+  const STEPS = ['Reserve', 'Agent', 'Live'];
+  const LAST = 1, MANDATE_MAX = 15000;
+  const CATS = ['electronics','fashion','beauty','sports','home','food','books','gaming','health','baby','pets'];
+
+  const $ = id => document.getElementById(id);
+  const val = id => ($(id).value || '').trim();
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+  const rupees = n => '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+
+  let cur = 0, reserve = null, agent = null, revealed = false;
+  let toastT;
+  function toast(m, bad) { $('toast-msg').textContent = m; $('toast').classList.toggle('bad', !!bad); $('toast').classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => $('toast').classList.remove('show'), 2600); }
+  async function api(p, o) { const r = await fetch(p, o); if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || 'Request failed.'); } return r.json(); }
+
+  function buildRail() {
+    $('rail-steps').innerHTML = STEPS.map((s, i) =>
+      `<div class="rs${i === 0 ? ' on' : ''}"><span class="rs-dot"><span class="n">${i+1}</span><svg class="ck" viewBox="0 0 14 14" fill="none"><path d="M2.5 7.2l3 3L11.5 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="rs-lb">${s}</span></div>`).join('');
+  }
+  function syncRail() {
+    document.querySelectorAll('.rs').forEach((el, i) => { el.classList.toggle('done', i < cur); el.classList.toggle('on', i === cur); });
+    $('rail-fill').style.width = (cur >= 2 ? 100 : (cur / 2) * 100) + '%';
+  }
+  function syncMandate() {
+    const v = +val('mandate') || 5000;
+    $('mandate-val').textContent = rupees(v);
+    $('mandate').style.setProperty('--pct', ((v - 500) / (MANDATE_MAX - 500) * 100) + '%');
+  }
+  function buildCats() {
+    $('cats').innerHTML = CATS.map(c => `<button type="button" class="pill" data-c="${c}">${c}</button>`).join('');
+    $('cats').querySelectorAll('.pill').forEach(p => p.addEventListener('click', () => p.classList.toggle('on')));
+  }
+  const chosenCats = () => Array.from($('cats').querySelectorAll('.pill.on')).map(p => p.dataset.c);
+
+  function markBad(id, msg) {
+    const box = $(id).closest('.float');
+    if (box) { box.classList.add('bad'); setTimeout(() => box.classList.remove('bad'), 420); }
+    const e = $(id + '-err'); if (e) { e.textContent = msg; e.style.display = 'block'; }
+    $(id).addEventListener('input', () => { if (e) e.style.display = 'none'; }, { once: true });
+  }
+  const clearErrs = () => document.querySelectorAll('.err').forEach(e => (e.style.display = 'none'));
+
+  async function signIn() {
+    clearErrs();
+    let ok = true;
+    if (!val('res-id')) { markBad('res-id', 'Reserve ID or email.'); ok = false; }
+    if (!val('res-secret')) { markBad('res-secret', 'Secret required.'); ok = false; }
+    if (!ok) return false;
+    const id = val('res-id');
+    const body = id.includes('@') && !id.startsWith('wal_')
+      ? { email: id, reserve_secret: val('res-secret') }
+      : { reserve_id: id, reserve_secret: val('res-secret') };
+    const login = await api('/api/reserve/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const me = await api('/api/reserve/me', { headers: { Authorization: 'Bearer ' + login.token } });
+    reserve = { ...login, ...me };
+    $('res-name').textContent = me.owner_name || login.name;
+    $('res-vpa').textContent = me.upi_vpa || '—';
+    $('res-bal').textContent = me.balance_display;
+    if (!$('agent-name').value) $('agent-name').value = (me.owner_name || 'My') + "'s shopper";
+    return true;
+  }
+
+  async function registerAgent() {
+    clearErrs();
+    let ok = true;
+    if (val('agent-name').length < 2) { markBad('agent-name', 'Give the agent a label.'); ok = false; }
+    if (!val('framework')) { markBad('framework', 'Pick a framework.'); ok = false; }
+    if (!ok) return false;
+    const mandate = +val('mandate') || 5000;
+    agent = await api('/api/agents/register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        buyer_name: val('agent-name'),
+        buyer_email: reserve.owner_email || '',
+        platform: val('framework'),
+        per_txn_limit: mandate,
+        daily_limit: Math.max(mandate, 10000),
+        monthly_limit: MANDATE_MAX * 4,
+        category_interests: chosenCats(),
+        wallet_id: reserve.wallet_id || reserve.reserve_id
+      })
+    });
+    paintDone();
+    return true;
+  }
+
+  function paintDone() {
+    const p = agent.passport || {};
+    $('pp-id').textContent = p.passport_id || '';
+    const scope = (p.categories && p.categories.length)
+      ? `<dd class="pp-scope">${p.categories.map(c => `<span>${esc(c)}</span>`).join('')}</dd>`
+      : '<dd>All categories</dd>';
+    const days = p.expires_at_ms ? Math.round((p.expires_at_ms - p.issued_at_ms) / 86400000) : '—';
+    $('pp-rows').innerHTML = `
+      <div class="pp-row"><dt>Settles from</dt><dd class="mono">${esc(p.principal_vpa || '—')}</dd></div>
+      <div class="pp-row"><dt>Settlement</dt><dd>UPI only</dd></div>
+      <div class="pp-row"><dt>Per purchase</dt><dd>${p.per_txn_cap != null ? rupees(p.per_txn_cap / 100) : '—'}</dd></div>
+      <div class="pp-row"><dt>Per day</dt><dd>${p.daily_cap != null ? rupees(p.daily_cap / 100) : '—'}</dd></div>
+      <div class="pp-row"><dt>Scope</dt>${scope}</div>
+      <div class="pp-row"><dt>Valid</dt><dd>${days} days</dd></div>
+      <div class="pp-row"><dt>Signature</dt><dd class="mono">${p.signature ? esc(p.signature.slice(0, 22)) + '…' : '—'}</dd></div>`;
+
+    $('d-aid').textContent = agent.agent_id;
+    $('d-sec').textContent = '•'.repeat(28);
+    revealed = false;
+
+    const base = location.origin;
+    $('code-py').textContent =
+`import requests
+
+AGENT_ID     = "${agent.agent_id}"
+AGENT_SECRET = "${agent.agent_secret}"
+BASE         = "${base}"
+
+# 1 · authenticate
+token = requests.post(f"{BASE}/agent/v1/auth/token", json={
+    "agent_id": AGENT_ID, "agent_secret": AGENT_SECRET,
+}).json()["token"]
+auth = {"Authorization": f"Bearer {token}"}
+
+# 2 · search every merchant at once
+hits = requests.post(f"{BASE}/agent/v1/search",
+    json={"query": "headphones", "limit": 5}, headers=auth).json()["results"]
+
+# 3 · buy. Default sends a UPI collect request the buyer approves
+#      in their UPI app — nothing is debited until they tap approve.
+order = requests.post(f"{BASE}/agent/v1/orders",
+    json={"product_id": hits[0]["product_id"], "quantity": 1},
+    headers=auth).json()
+
+print(order["status"])        # awaiting_upi_approval
+# The passport gate runs first: over the cap, out of scope,
+# expired or revoked -> refused with a reason, no request sent.`;
+
+    $('code-adk').textContent =
+`import os
+from google.adk.agents import Agent
+from google.adk.tools.mcp_tool.mcp_toolset import (
+    McpToolset, StdioConnectionParams,
+)
+from mcp import StdioServerParameters
+
+os.environ["AGENT_ID"] = "${agent.agent_id}"
+
+# The MCP server holds the credentials and talks to the gateway;
+# the model never sees a secret.
+commerce = McpToolset(connection_params=StdioConnectionParams(
+    server_params=StdioServerParameters(
+        command="python", args=["-m", "commerce_platform.mcp_server"],
+    ),
+    timeout=30,
+))
+
+agent = Agent(
+    model="gemini-2.0-flash",
+    name="shopping_agent",
+    instruction=(
+        "Find products across merchants and compare them. "
+        "Confirm with the user, then buy — the purchase goes to "
+        "their UPI app for approval. Never claim it is paid "
+        "until check_order_status says paid."
+    ),
+    tools=[commerce],
+)
+
+# tools: search_products · get_product_details · purchase_product
+#        check_order_status · check_budget · view_audit_log`;
+  }
+
+  function goTo(n, dir) {
+    if (n < 0 || n > 2) return;
+    $('step-' + cur).classList.remove('active', 'in-r', 'in-l');
+    const el = $('step-' + n); el.classList.add('active', dir === 'back' ? 'in-l' : 'in-r');
+    setTimeout(() => el.classList.remove('in-r', 'in-l'), 440);
+    cur = n; syncRail(); syncFoot(); window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function syncFoot() {
+    $('btn-back').style.visibility = (cur === 0 || cur === 2) ? 'hidden' : 'visible';
+    if (cur === 2) { $('foot').style.display = 'none'; return; }
+    $('foot').style.display = 'flex';
+    $('btn-next-lb').textContent = cur === 0 ? 'Sign in' : 'Register agent';
+    $('btn-next-ic').style.display = cur === LAST ? 'none' : '';
+  }
+
+  async function onNext() {
+    const btn = $('btn-next'), lb = $('btn-next-lb');
+    const original = lb.textContent;
+    btn.disabled = true;
+    lb.textContent = cur === 0 ? 'Signing in' : 'Registering';
+    try {
+      const done = cur === 0 ? await signIn() : await registerAgent();
+      if (done) goTo(cur + 1, 'fwd');
+    } catch (e) { toast(e.message, true); }
+    finally { btn.disabled = false; lb.textContent = original; syncFoot(); }
+  }
+
+  function init() {
+    buildRail(); buildCats(); syncMandate();
+    document.querySelectorAll('select').forEach(s => {
+      const sync = () => s.classList.toggle('filled', !!s.value);
+      s.addEventListener('change', sync); sync();
+    });
+    $('mandate').addEventListener('input', syncMandate);
+    $('btn-back').addEventListener('click', () => goTo(cur - 1, 'back'));
+    $('btn-next').addEventListener('click', onNext);
+    ['res-id','res-secret'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); onNext(); } }));
+
+    document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+      document.querySelectorAll('.pane').forEach(p => p.classList.remove('on'));
+      tab.classList.add('on'); $('pane-' + tab.dataset.tab).classList.add('on');
+    }));
+    document.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', () => {
+      const id = b.dataset.copy;
+      const text = (id === 'd-sec' && agent) ? agent.agent_secret : $(id).textContent;
+      navigator.clipboard.writeText(text).then(() => { b.classList.add('ok'); setTimeout(() => b.classList.remove('ok'), 1600); toast('Copied'); });
+    }));
+    $('d-reveal').addEventListener('click', () => {
+      if (!agent) return;
+      revealed = !revealed;
+      $('d-sec').textContent = revealed ? agent.agent_secret : '•'.repeat(28);
+      $('d-reveal').classList.toggle('ok', revealed);
+    });
+    $('btn-copy-code').addEventListener('click', () => {
+      const pane = document.querySelector('.pane.on pre');
+      if (pane) navigator.clipboard.writeText(pane.textContent).then(() => toast('Snippet copied'));
+    });
+    syncRail(); syncFoot();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>

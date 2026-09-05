@@ -1,0 +1,633 @@
+<title>Get Started</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/theme.css">
+
+<style>
+.page{max-width:760px;margin:0 auto;padding:44px 24px 90px}
+.otp{display:flex;gap:9px;justify-content:center;margin:6px 0 4px}
+.otp input{width:46px;height:56px;text-align:center;font-family:var(--f-disp);font-size:22px;font-weight:800;
+  color:var(--ink);border-radius:var(--r-md);outline:none;background:var(--glass-2);
+  border:1.5px solid var(--glass-line);transition:border-color .2s,box-shadow .2s,transform .2s var(--spring)}
+.otp input:focus{border-color:var(--brand);box-shadow:var(--ring);transform:translateY(-2px)}
+.otp input.filled{border-color:var(--ok);color:var(--ok)}
+.otp-meta{text-align:center;font-size:12px;color:var(--ink-4);margin-top:8px}
+.otp-meta a{color:var(--brand);font-weight:600;cursor:pointer}
+.meter{margin:14px 0 4px}
+.meter-bar{position:relative;height:10px;border-radius:6px;background:var(--glass-3);overflow:hidden}
+.meter-fill{position:absolute;inset:0 auto 0 0;width:0;border-radius:6px;
+  background:linear-gradient(90deg,var(--brand-soft),var(--brand) 60%,var(--ok));transition:width .6s var(--spring)}
+.meter-labels{display:flex;justify-content:space-between;margin-top:7px;font-size:11px;color:var(--ink-4)}
+.meter-labels b{color:var(--ink-2);font-family:var(--f-disp);font-variant-numeric:tabular-nums}
+.mandate-read{display:flex;align-items:baseline;gap:8px;margin:2px 0 6px}
+.mandate-read b{font-family:var(--f-disp);font-size:26px;font-weight:800;letter-spacing:-.03em;color:var(--brand);font-variant-numeric:tabular-nums}
+.mandate-read span{font-size:12.5px;color:var(--ink-3)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;outline:none;
+  background:linear-gradient(90deg,var(--brand) var(--pct,50%),var(--glass-3) var(--pct,50%));margin:10px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+  background:#fff;border:3px solid var(--brand);cursor:pointer;box-shadow:var(--shadow-sm);transition:transform .2s var(--spring)}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+.bal-hero{text-align:center;padding:6px 0 2px}
+.bal-hero .amt{font-family:var(--f-disp);font-size:42px;font-weight:800;letter-spacing:-.04em;
+  font-variant-numeric:tabular-nums;line-height:1;background:linear-gradient(120deg,var(--brand),var(--indigo));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.bal-hero .cap{font-size:12px;color:var(--ink-4);margin-top:8px}
+.wsum{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:18px}
+.wtile{padding:15px 16px;border-radius:var(--r-lg);background:var(--glass-2);border:1px solid var(--glass-line);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.wtile-lb{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-4);margin-bottom:6px}
+.wtile-v{font-family:var(--f-disp);font-size:20px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.wtile-v.accent{color:var(--brand)} .wtile-v.ok{color:var(--ok)}
+.wtile-sub{font-size:11px;color:var(--ink-4);margin-top:2px}
+
+/* Passport summary */
+.pp-card{border-radius:var(--r-lg);padding:17px;background:var(--glass-2);border:1px solid var(--glass-line);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);margin-bottom:14px;animation:up .45s var(--ease) both}
+.pp-head{display:flex;align-items:center;gap:9px;margin-bottom:13px}
+.pp-seal{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(140deg,var(--ok),#0AA97C);box-shadow:0 5px 14px -6px var(--ok)}
+.pp-head b{font-family:var(--f-disp);font-size:13.5px;font-weight:800}
+.pp-head span{font-size:11px;color:var(--ink-4);display:block}
+.pp-rows{display:flex;flex-direction:column}
+.pp-row{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid var(--glass-line);font-size:12.5px}
+.pp-row:last-child{border-bottom:none}
+.pp-row dt{color:var(--ink-4);font-weight:600}
+.pp-row dd{font-family:var(--f-disp);font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.pp-row dd.mono{font-family:var(--f-mono);font-weight:500;font-size:11px}
+.pp-scope{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.pp-scope span{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--tint);color:var(--brand)}
+
+.led{display:flex;flex-direction:column;gap:7px}
+.led-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--r-md);
+  background:var(--glass-2);border:1px solid var(--glass-line);animation:up .4s var(--ease) both}
+.led-ic{width:32px;height:32px;border-radius:10px;flex-shrink:0;display:grid;place-items:center}
+.led-ic.credit{background:var(--ok-soft);color:var(--ok)}
+.led-ic.debit{background:var(--tint);color:var(--brand)}
+.led-body{flex:1;min-width:0}
+.led-kind{font-family:var(--f-disp);font-size:13px;font-weight:700;letter-spacing:-.01em;text-transform:capitalize}
+.led-sub{font-size:11px;color:var(--ink-4)}
+.led-amt{font-family:var(--f-disp);font-size:14.5px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.led-amt.credit{color:var(--ok)} .led-amt.debit{color:var(--ink)}
+.led-bal{font-size:10.5px;color:var(--ink-4);text-align:right;font-variant-numeric:tabular-nums}
+</style>
+
+<div class="field"></div>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+<div class="grain"></div>
+
+<nav class="nav">
+  <div class="nav-glass">
+    <a class="brand" href="/">
+      <span class="brand-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4-4 4 4M4 10l4 4 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Agent Commerce
+    </a>
+    <div class="nav-links">
+      <a href="/user" class="active">User</a>
+      <a href="/merchant">Merchant</a>
+      <a href="/verify">Verify</a>
+      <a href="/upi">UPI</a>
+    </div>
+  </div>
+</nav>
+
+<main class="page">
+  <header class="head">
+    <span class="eyebrow"><span class="pulse"></span>UPI Reserve Pay · Agent Passport</span>
+    <h1>Reserve, register, and <em>let your agent shop</em></h1>
+    <p>Block up to ₹10,000 with one UPI PIN, register an AI agent, and get a signed passport — all in one flow.</p>
+  </header>
+
+  <!-- A returning user landing on a blank wizard is friction; point them at
+       their console without hijacking the page if they came to add an agent. -->
+  <a href="/home" id="back-banner" style="display:none;align-items:center;gap:10px;margin-bottom:16px;padding:12px 16px;
+     border-radius:var(--r-lg);background:var(--tint);border:1px solid var(--glass-edge);text-decoration:none;color:var(--ink)">
+    <svg width="17" height="17" viewBox="0 0 18 18" fill="none" style="color:var(--brand);flex-shrink:0"><rect x="3" y="6" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M9 2.5v3.5M7 9.5v1.5M11 9.5v1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <span style="flex:1;font-size:13px"><b style="font-family:var(--f-disp)">You already have a reserve.</b>
+      <span style="color:var(--ink-3)">Open your agent console instead of starting over.</span></span>
+    <span style="font-family:var(--f-disp);font-size:12.5px;font-weight:700;color:var(--brand);white-space:nowrap">Open →</span>
+  </a>
+
+  <section class="shell">
+    <div class="rail">
+      <div class="rail-track"><div class="rail-fill" id="rail-fill"></div></div>
+      <div class="rail-steps" id="rail-steps"></div>
+    </div>
+
+    <!-- 0 · Identity -->
+    <div class="step active" id="step-0">
+      <div class="sh"><h2>Who is reserving?</h2><p>We route the agent's spending back to you.</p></div>
+      <div class="fg"><div class="float">
+        <input type="text" id="owner-name" placeholder=" " autocomplete="name">
+        <label for="owner-name">Your name</label>
+      </div><span class="err" id="owner-name-err"></span></div>
+      <div class="grid-2">
+        <div class="fg"><div class="float">
+          <input type="email" id="owner-email" placeholder=" " autocomplete="email">
+          <label for="owner-email">Email</label>
+        </div><span class="err" id="owner-email-err"></span></div>
+        <div class="fg"><div class="float">
+          <input type="tel" id="owner-mobile" placeholder=" " maxlength="10" autocomplete="tel">
+          <label for="owner-mobile">Mobile number</label>
+        </div><span class="err" id="owner-mobile-err"></span></div>
+      </div>
+      <div class="pnote live">
+        <span class="pnote-ico"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><span class="pnote-lb">One reserve, one ceiling</span>
+          <p>A single UPI Reserve Pay block tops out at ₹10,000 — RBI's real cap. Your agent settles from it in UPI, and only UPI.</p></div>
+      </div>
+    </div>
+
+    <!-- 1 · Fund reserve -->
+    <div class="step" id="step-1">
+      <div class="sh"><h2>Authorize &amp; add funds</h2><p>Approve once — that single factor is the consent the whole model rests on.</p></div>
+
+      <div class="fg">
+        <label class="lb">Enter the code sent to your mobile</label>
+        <div class="otp" id="otp">
+          <input type="text" inputmode="numeric" maxlength="1"><input type="text" inputmode="numeric" maxlength="1">
+          <input type="text" inputmode="numeric" maxlength="1"><input type="text" inputmode="numeric" maxlength="1">
+          <input type="text" inputmode="numeric" maxlength="1"><input type="text" inputmode="numeric" maxlength="1">
+        </div>
+        <div class="otp-meta">Demo code is <b>123456</b> · <a id="otp-fill">autofill</a></div>
+        <span class="err" id="otp-err" style="text-align:center"></span>
+      </div>
+
+      <hr class="rule">
+      <div class="fg"><div class="float">
+        <input type="text" id="upi-id" placeholder=" ">
+        <label for="upi-id">Your UPI ID</label>
+      </div>
+      <p class="hint">The identity your agent settles from — and where a UPI collect lands. Something like <code style="font-family:var(--f-mono)">name@okaxis</code>.</p>
+      <span class="err" id="upi-id-err"></span></div>
+
+      <div class="fg">
+        <label class="lb">Add funds via</label>
+        <div class="pay-methods">
+          <label class="pay-method on" data-pm="upi">
+            <input type="radio" name="pm" value="upi" checked>
+            <span class="pm-ico"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M11 2L5 10.5h4l-1 7.5 6-9h-4l1-7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+            <span class="pm-body"><b>UPI</b><span>Collect to your UPI ID</span></span>
+            <span class="pm-check"></span>
+          </label>
+          <label class="pay-method" data-pm="card">
+            <input type="radio" name="pm" value="card">
+            <span class="pm-ico"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="2.5" y="4.5" width="15" height="11" rx="2.2" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 8h15" stroke="currentColor" stroke-width="1.6"/></svg></span>
+            <span class="pm-body"><b>Card</b><span>Debit / credit card</span></span>
+            <span class="pm-check"></span>
+          </label>
+        </div>
+        <div class="pay-fields" id="card-fields"><div>
+          <div class="fg" style="margin:0 0 10px"><div class="float">
+            <input type="text" id="card-number" placeholder=" " maxlength="19" inputmode="numeric">
+            <label for="card-number">Card number</label>
+          </div></div>
+          <div class="card-row">
+            <div class="float"><input type="text" id="card-exp" placeholder=" " maxlength="5"><label for="card-exp">MM / YY</label></div>
+            <div class="float"><input type="text" id="card-cvv" placeholder=" " maxlength="3" inputmode="numeric"><label for="card-cvv">CVV</label></div>
+          </div>
+          <p class="hint">Demo only — no real card data is sent or stored.</p>
+        </div></div>
+      </div>
+
+      <hr class="rule">
+      <div class="fg">
+        <label class="lb">Reserve amount</label>
+        <div class="money" id="m-fund"><span class="cur">₹</span><input type="number" id="fund" value="8000" min="100" step="100"></div>
+        <div class="presets" data-for="fund">
+          <button type="button" class="preset" data-v="2000">₹2,000</button>
+          <button type="button" class="preset" data-v="5000">₹5,000</button>
+          <button type="button" class="preset on" data-v="8000">₹8,000</button>
+          <button type="button" class="preset" data-v="10000">₹10,000</button>
+        </div>
+        <span class="err" id="fund-err"></span>
+      </div>
+      <div class="meter">
+        <div class="meter-bar"><div class="meter-fill" id="meter-fill"></div></div>
+        <div class="meter-labels"><span>Reserving <b id="meter-amt">₹8,000</b></span><span>Ceiling <b>₹10,000</b></span></div>
+      </div>
+
+      <div class="pnote">
+        <span class="pnote-ico"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l5.5 2.2v3.6c0 3.2-2.3 6-5.5 7.2-3.2-1.2-5.5-4-5.5-7.2V3.7L8 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>
+        <div><span class="pnote-lb">This is the AFA step</span>
+          <p>In production the block is confirmed with your UPI PIN. It is the only point a human authenticates — everything the agent does afterwards rides on this one consent.</p></div>
+      </div>
+    </div>
+
+    <!-- 2 · Agent + mandate -->
+    <div class="step" id="step-2">
+      <div class="sh"><h2>Configure your agent</h2><p>Set the mandate — how much it may spend per purchase without asking again.</p></div>
+      <div class="fg"><div class="float">
+        <input type="text" id="agent-name" placeholder=" ">
+        <label for="agent-name">Agent label</label>
+      </div><span class="err" id="agent-name-err"></span></div>
+      <div class="fg"><div class="float">
+        <select id="framework">
+          <option value="" disabled selected></option>
+          <option value="google-adk" selected>Google ADK</option>
+          <option value="langchain">LangChain</option>
+          <option value="crewai">CrewAI</option>
+          <option value="anthropic-sdk">Anthropic SDK</option>
+          <option value="custom">Custom / Other</option>
+        </select>
+        <label for="framework">Agent framework</label>
+        <span class="caret"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div>
+      <p class="hint">We tailor the quickstart snippet to this.</p></div>
+
+      <hr class="rule">
+      <div class="fg">
+        <label class="lb">Autonomous spend, per purchase</label>
+        <div class="mandate-read"><b id="mandate-val">₹5,000</b><span>and under — no approval needed</span></div>
+        <input type="range" id="mandate" min="500" max="15000" step="500" value="5000">
+        <p class="hint">RBI caps the no-AFA e-mandate lane at ₹15,000 per transaction. Anything above is refused by the passport.</p>
+      </div>
+
+      <div class="fg" style="margin-bottom:0">
+        <label class="lb">Category scope</label>
+        <p class="hint" style="margin:-4px 0 10px">Leave all off to allow every category.</p>
+        <div class="pills" id="cats"></div>
+      </div>
+
+      <div class="pnote live">
+        <span class="pnote-ico"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><span class="pnote-lb">This mints a signed Agent Passport</span>
+          <p>The agent gets a cryptographically-signed passport carrying this authority. A merchant verifies it without trusting us — and its cap is enforced on every purchase.</p></div>
+      </div>
+    </div>
+
+    <!-- 3 · Done -->
+    <div class="step" id="step-3">
+      <div class="done-hero">
+        <div class="burst"><span class="burst-ring"></span><span class="burst-ring"></span>
+          <span class="burst-core"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <h2>Reserve live, agent authorized</h2>
+        <p>Your agent can now shop and pay on its own inside the mandate.</p>
+      </div>
+
+      <div class="bal-hero"><div class="amt" id="d-balance">₹0</div><div class="cap">of ₹10,000 reserved</div></div>
+      <div class="wsum">
+        <div class="wtile"><div class="wtile-lb">Autonomous / purchase</div><div class="wtile-v accent" id="d-mandate">₹5,000</div><div class="wtile-sub">no approval needed</div></div>
+        <div class="wtile"><div class="wtile-lb">Agent Passport</div><div class="wtile-v ok" style="font-size:14px" id="d-pass">—</div><div class="wtile-sub">Ed25519 · verifiable</div></div>
+      </div>
+
+      <div class="pp-card" id="pp-card">
+        <div class="pp-head">
+          <span class="pp-seal"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1.5l6 2.4v3.9c0 3.5-2.5 6.6-6 7.7-3.5-1.1-6-4.2-6-7.7V3.9L9 1.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.4 8.8l1.8 1.8 3.4-3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <div><b>Agent Passport</b><span id="pp-id">—</span></div>
+        </div>
+        <dl class="pp-rows" id="pp-rows"></dl>
+      </div>
+
+      <div class="cred"><div class="cred-top"><span class="cred-lb">Reserve ID</span><div class="cred-acts"><button class="ib" data-copy="d-rid" title="Copy"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="5.2" y="5.2" width="8" height="8" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M3 10.6V3.6A.6.6 0 013.6 3h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></div></div><div class="cred-val" id="d-rid">&mdash;</div></div>
+      <div class="cred"><div class="cred-top"><span class="cred-lb">Reserve Secret</span><div class="cred-acts"><button class="ib" id="d-reveal-r" title="Reveal"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M1.5 8s2.5-4.6 6.5-4.6S14.5 8 14.5 8s-2.5 4.6-6.5 4.6S1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.35"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.35"/></svg></button><button class="ib" data-copy="d-rsec" title="Copy"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="5.2" y="5.2" width="8" height="8" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M3 10.6V3.6A.6.6 0 013.6 3h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></div></div><div class="cred-val" id="d-rsec">&mdash;</div>
+        <p class="hint" style="margin-top:7px">Signs you back in to your agent console and your UPI inbox.</p></div>
+
+      <div class="cred"><div class="cred-top"><span class="cred-lb">Agent ID</span><div class="cred-acts"><button class="ib" data-copy="d-aid" title="Copy"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="5.2" y="5.2" width="8" height="8" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M3 10.6V3.6A.6.6 0 013.6 3h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></div></div><div class="cred-val" id="d-aid">&mdash;</div></div>
+      <div class="cred"><div class="cred-top"><span class="cred-lb">Agent Secret</span><div class="cred-acts"><button class="ib" id="d-reveal" title="Reveal"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M1.5 8s2.5-4.6 6.5-4.6S14.5 8 14.5 8s-2.5 4.6-6.5 4.6S1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.35"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.35"/></svg></button><button class="ib" data-copy="d-sec" title="Copy"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="5.2" y="5.2" width="8" height="8" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M3 10.6V3.6A.6.6 0 013.6 3h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></div></div><div class="cred-val" id="d-sec">&mdash;</div></div>
+
+      <div class="note"><svg width="17" height="17" viewBox="0 0 18 18" fill="none"><path d="M9 1.8L1.6 15.2h14.8L9 1.8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 6.8v3.4M9 12.6v.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><p><b>Save the secret now.</b> It authenticates the agent and is shown only once.</p></div>
+
+      <div class="sect"><span class="sect-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5.5 4L2 8l3.5 4M10.5 4L14 8l-3.5 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><h3>Wire it up<small>Live calls against this gateway</small></h3></div></div>
+      <div class="tabs"><button class="tab on" data-tab="py">Python</button><button class="tab" data-tab="adk">Google ADK</button></div>
+      <div class="code">
+        <button class="ib" id="btn-copy-code" title="Copy code"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="5.2" y="5.2" width="8" height="8" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M3 10.6V3.6A.6.6 0 013.6 3h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+        <div class="pane on" id="pane-py"><pre id="code-py"></pre></div>
+        <div class="pane" id="pane-adk"><pre id="code-adk"></pre></div>
+      </div>
+
+      <div class="hist-head" style="display:flex;align-items:center;gap:9px;margin:22px 0 13px">
+        <h2 style="font-family:var(--f-disp);font-size:14px;font-weight:800">Reserve activity</h2>
+        <button class="btn b-glass b-sm" id="d-refresh" type="button" style="margin-left:auto">Refresh</button>
+      </div>
+      <div class="led" id="ledger"></div>
+
+      <div class="done-foot" style="margin-top:22px">
+        <a class="btn b-glass" href="/verify">Verify passport</a>
+        <a class="btn b-primary" href="/home">Open your agent console →</a>
+      </div>
+    </div>
+
+    <div class="foot" id="foot">
+      <button class="btn b-quiet" id="btn-back" style="visibility:hidden"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3.5L5.5 8l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button>
+      <button class="btn b-primary" id="btn-next"><span id="btn-next-lb">Continue</span><svg width="15" height="15" viewBox="0 0 16 16" fill="none" id="btn-next-ic"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="toast-msg"></span></div>
+
+<script>
+(function () {
+  'use strict';
+  const STEPS = ['Identity', 'Reserve', 'Agent', 'Live'];
+  const LAST = 2, CAP = 10000, MANDATE_MAX = 15000;
+  const CATS = ['electronics','fashion','beauty','sports','home','food','books','gaming','health','baby','pets'];
+  const $ = id => document.getElementById(id);
+  const val = id => ($(id).value || '').trim();
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+  const rupees = n => '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+
+  let cur = 0, reserve = null, agent = null, revealed = false;
+  let toastT;
+  function toast(m, bad) { $('toast-msg').textContent = m; $('toast').classList.toggle('bad', !!bad); $('toast').classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => $('toast').classList.remove('show'), 2600); }
+  async function api(p, o) { const r = await fetch(p, o); if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || 'Request failed.'); } return r.json(); }
+
+  function buildRail() {
+    $('rail-steps').innerHTML = STEPS.map((s, i) =>
+      `<div class="rs${i === 0 ? ' on' : ''}" data-i="${i}"><span class="rs-dot"><span class="n">${i + 1}</span><svg class="ck" viewBox="0 0 14 14" fill="none"><path d="M2.5 7.2l3 3L11.5 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="rs-lb">${s}</span></div>`).join('');
+  }
+  function syncRail() {
+    document.querySelectorAll('.rs').forEach((el, i) => { el.classList.toggle('done', i < cur); el.classList.toggle('on', i === cur); });
+    $('rail-fill').style.width = (cur >= 3 ? 100 : (cur / 3) * 100) + '%';
+  }
+
+  const pm = () => (document.querySelector('input[name="pm"]:checked') || {}).value || 'upi';
+
+  function syncMeter() {
+    const amt = Math.max(0, +val('fund') || 0);
+    $('meter-fill').style.width = Math.min(100, (amt / CAP) * 100) + '%';
+    $('meter-amt').textContent = rupees(amt);
+    $('meter-fill').style.background = amt > CAP ? 'linear-gradient(90deg,var(--bad),var(--bad))'
+      : 'linear-gradient(90deg,var(--brand-soft),var(--brand) 60%,var(--ok))';
+    document.querySelectorAll('.preset').forEach(p => p.classList.toggle('on', +p.dataset.v === amt));
+  }
+  function syncMandate() { const v = +val('mandate') || 5000; $('mandate-val').textContent = rupees(v); $('mandate').style.setProperty('--pct', ((v - 500) / (MANDATE_MAX - 500) * 100) + '%'); }
+
+  function buildCats() {
+    $('cats').innerHTML = CATS.map(c => `<button type="button" class="pill" data-c="${c}">${c}</button>`).join('');
+    $('cats').querySelectorAll('.pill').forEach(p => p.addEventListener('click', () => p.classList.toggle('on')));
+  }
+  const chosenCats = () => Array.from($('cats').querySelectorAll('.pill.on')).map(p => p.dataset.c);
+
+  function bindOtp() {
+    const b = Array.from($('otp').querySelectorAll('input'));
+    b.forEach((x, i) => {
+      x.addEventListener('input', () => { x.value = x.value.replace(/\D/g, '').slice(0, 1); x.classList.toggle('filled', !!x.value); if (x.value && i < 5) b[i + 1].focus(); });
+      x.addEventListener('keydown', e => { if (e.key === 'Backspace' && !x.value && i > 0) b[i - 1].focus(); });
+    });
+    $('otp-fill').addEventListener('click', () => { '123456'.split('').forEach((d, i) => { b[i].value = d; b[i].classList.add('filled'); }); $('otp-err').style.display = 'none'; });
+  }
+  const otpValue = () => Array.from($('otp').querySelectorAll('input')).map(x => x.value).join('');
+
+  function markBad(id, msg, box) {
+    const el = box ? $(box) : $(id).closest('.float');
+    if (el) { el.classList.add('bad'); setTimeout(() => el.classList.remove('bad'), 420); }
+    const e = $(id + '-err'); if (e) { e.textContent = msg; e.style.display = 'block'; }
+    if ($(id)) $(id).addEventListener('input', () => { if (e) e.style.display = 'none'; }, { once: true });
+  }
+  const clearErrs = () => document.querySelectorAll('.err').forEach(e => (e.style.display = 'none'));
+
+  function validate(n) {
+    clearErrs(); let ok = true;
+    if (n === 0) {
+      if (val('owner-name').length < 2) { markBad('owner-name', 'At least two characters.'); ok = false; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('owner-email'))) { markBad('owner-email', 'Enter a valid email.'); ok = false; }
+      if (!/^\d{10}$/.test(val('owner-mobile'))) { markBad('owner-mobile', '10-digit mobile.'); ok = false; }
+    }
+    if (n === 1) {
+      if (otpValue() !== '123456') { markBad('otp', 'Enter the demo code 123456 (or autofill).'); $('otp-err').style.display = 'block'; ok = false; }
+      const vpa = val('upi-id').toLowerCase();
+      if (vpa.indexOf('@') < 1 || vpa.indexOf(' ') >= 0) { markBad('upi-id', 'A UPI id like name@bank.'); ok = false; }
+      if (pm() === 'card') {
+        if (val('card-number').replace(/\s/g, '').length < 12) { markBad('card-number', 'Enter a card number.'); ok = false; }
+      }
+      const amt = +val('fund') || 0;
+      if (amt < 100) { markBad('fund', 'Reserve at least ₹100.', 'm-fund'); ok = false; }
+      else if (amt > CAP) { markBad('fund', 'A single reserve tops out at ₹10,000.', 'm-fund'); ok = false; }
+    }
+    if (n === 2) {
+      if (val('agent-name').length < 2) { markBad('agent-name', 'Give the agent a label.'); ok = false; }
+      if (!val('framework')) { markBad('framework', 'Pick a framework.'); ok = false; }
+    }
+    return ok;
+  }
+
+  async function createReserve() {
+    reserve = await api('/api/reserve/create', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ owner_name: val('owner-name'), owner_email: val('owner-email'), upi_vpa: val('upi-id'), owner_phone: val('owner-mobile'),
+                     opening_balance: +val('fund') || 0 })
+    });
+    // Hand the token to the home page and the UPI app so neither asks the user
+    // to sign in again seconds after being handed credentials.
+    try { sessionStorage.setItem('rs_token', reserve.token); } catch (e) { /* private mode */ }
+    toast('Reserved ' + reserve.balance_display + ' via ' + pm().toUpperCase());
+  }
+
+  async function authorizeAgent() {
+    const mandate = +val('mandate') || 5000;
+    agent = await api('/api/agents/register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        buyer_name: val('agent-name'), buyer_email: val('owner-email'),
+        platform: val('framework') || 'google-adk',
+        per_txn_limit: mandate, daily_limit: Math.max(mandate, CAP), monthly_limit: MANDATE_MAX * 4,
+        autonomy_mode: 'auto', category_interests: chosenCats(), wallet_id: reserve.reserve_id
+      })
+    });
+  }
+
+  async function paintDone() {
+    const me = await api('/api/reserve/me', { headers: { Authorization: 'Bearer ' + reserve.token } });
+    $('d-balance').textContent = me.balance_display;
+    $('d-mandate').textContent = rupees(+val('mandate') || 5000);
+    $('d-rid').textContent = reserve.reserve_id;
+    $('d-rsec').textContent = '•'.repeat(24);
+    $('d-aid').textContent = agent.agent_id;
+    $('d-sec').textContent = '•'.repeat(28); revealed = false;
+
+    const p = agent.passport || {};
+    $('d-pass').textContent = p.passport_id || 'issued';
+    $('pp-id').textContent = p.passport_id || '';
+    const scope = (p.categories && p.categories.length)
+      ? `<dd class="pp-scope">${p.categories.map(c => `<span>${esc(c)}</span>`).join('')}</dd>`
+      : '<dd>All categories</dd>';
+    const days = p.expires_at_ms ? Math.round((p.expires_at_ms - p.issued_at_ms) / 86400000) : '—';
+    $('pp-rows').innerHTML = `
+      <div class="pp-row"><dt>Settles from</dt><dd class="mono">${esc(p.principal_vpa || '—')}</dd></div>
+      <div class="pp-row"><dt>Settlement</dt><dd>UPI only</dd></div>
+      <div class="pp-row"><dt>Per purchase</dt><dd>${p.per_txn_cap != null ? rupees(p.per_txn_cap / 100) : '—'}</dd></div>
+      <div class="pp-row"><dt>Per day</dt><dd>${p.daily_cap != null ? rupees(p.daily_cap / 100) : '—'}</dd></div>
+      <div class="pp-row"><dt>Scope</dt>${scope}</div>
+      <div class="pp-row"><dt>Valid</dt><dd>${days} days</dd></div>
+      <div class="pp-row"><dt>Signature</dt><dd class="mono">${p.signature ? esc(p.signature.slice(0, 22)) + '…' : '—'}</dd></div>`;
+
+    const base = location.origin;
+    $('code-py').textContent =
+`import requests
+
+AGENT_ID     = "${agent.agent_id}"
+AGENT_SECRET = "${agent.agent_secret}"
+BASE         = "${base}"
+
+# 1 · authenticate
+token = requests.post(f"{BASE}/agent/v1/auth/token", json={
+    "agent_id": AGENT_ID, "agent_secret": AGENT_SECRET,
+}).json()["token"]
+auth = {"Authorization": f"Bearer {token}"}
+
+# 2 · search every merchant at once
+hits = requests.post(f"{BASE}/agent/v1/search",
+    json={"query": "headphones", "limit": 5}, headers=auth).json()["results"]
+
+# 3 · buy. Default sends a UPI collect request the buyer approves
+#      in their UPI app — nothing is debited until they tap approve.
+order = requests.post(f"{BASE}/agent/v1/orders",
+    json={"product_id": hits[0]["product_id"], "quantity": 1},
+    headers=auth).json()
+
+print(order["status"])        # awaiting_upi_approval`;
+
+    $('code-adk').textContent =
+`import os
+from google.adk.agents import Agent
+from google.adk.tools.mcp_tool.mcp_toolset import (
+    McpToolset, StdioConnectionParams,
+)
+from mcp import StdioServerParameters
+
+os.environ["AGENT_ID"] = "${agent.agent_id}"
+
+# The MCP server holds the credentials and talks to the gateway;
+# the model never sees a secret.
+commerce = McpToolset(connection_params=StdioConnectionParams(
+    server_params=StdioServerParameters(
+        command="python", args=["-m", "commerce_platform.mcp_server"],
+    ),
+    timeout=30,
+))
+
+agent = Agent(
+    model="gemini-2.0-flash",
+    name="shopping_agent",
+    instruction=(
+        "Find products across merchants and compare them. "
+        "Confirm with the user, then buy — the purchase goes to "
+        "their UPI app for approval. Never claim it is paid "
+        "until check_order_status says paid."
+    ),
+    tools=[commerce],
+)
+
+# tools: search_products · get_product_details · purchase_product
+#        check_order_status · check_budget · view_audit_log`;
+
+    renderLedger(me.ledger || []);
+  }
+
+  function renderLedger(rows) {
+    if (!rows.length) { $('ledger').innerHTML = '<div class="empty">No activity yet.</div>'; return; }
+    $('ledger').innerHTML = rows.map((r, i) => `
+      <div class="led-row" style="animation-delay:${Math.min(i, 8) * 0.03}s">
+        <span class="led-ic ${r.direction}">${r.direction === 'credit'
+          ? '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 12V4M4 7.5L8 3.5l4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+          : '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 4v8M4 8.5L8 12.5l4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'}</span>
+        <span class="led-body"><span class="led-kind">${r.kind}</span><span class="led-sub">${r.counterparty || (r.kind === 'topup' ? 'Reserve authorized' : '')}</span></span>
+        <span style="text-align:right"><span class="led-amt ${r.direction}">${r.direction === 'credit' ? '+' : '−'}${r.amount_display}</span><span class="led-bal">bal ${r.balance_after_display}</span></span>
+      </div>`).join('');
+  }
+
+  function goTo(n, dir) {
+    if (n < 0 || n > 3) return;
+    if (n === 2 && !$('agent-name').value && val('owner-name')) $('agent-name').value = val('owner-name') + "'s shopper";
+    $('step-' + cur).classList.remove('active', 'in-r', 'in-l');
+    const el = $('step-' + n); el.classList.add('active', dir === 'back' ? 'in-l' : 'in-r');
+    setTimeout(() => el.classList.remove('in-r', 'in-l'), 440);
+    cur = n; syncRail(); syncFoot(); window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function syncFoot() {
+    $('btn-back').style.visibility = (cur === 0 || cur === 3) ? 'hidden' : 'visible';
+    if (cur === 3) { $('foot').style.display = 'none'; return; }
+    $('foot').style.display = 'flex';
+    $('btn-next-lb').textContent = cur === LAST ? 'Authorize & go live' : (cur === 1 ? 'Reserve funds' : 'Continue');
+    $('btn-next-ic').style.display = cur === LAST ? 'none' : '';
+  }
+
+  async function onNext() {
+    if (!validate(cur)) return;
+    const btn = $('btn-next');
+    if (cur === 1) {
+      btn.disabled = true; $('btn-next-lb').textContent = 'Reserving';
+      try { await createReserve(); goTo(2, 'fwd'); } catch (e) { toast(e.message, true); } finally { btn.disabled = false; syncFoot(); }
+      return;
+    }
+    if (cur === 2) {
+      btn.disabled = true; $('btn-next-lb').textContent = 'Authorizing';
+      $('btn-next-ic').outerHTML = '<span class="spin" id="btn-next-ic"></span>';
+      try { await authorizeAgent(); await paintDone(); goTo(3, 'fwd'); }
+      catch (e) { toast(e.message, true); $('btn-next-ic').outerHTML = '<svg width="15" height="15" id="btn-next-ic"></svg>'; btn.disabled = false; syncFoot(); }
+      return;
+    }
+    goTo(cur + 1, 'fwd');
+  }
+
+  function watchSelect(sel) { const s = () => sel.classList.toggle('filled', !!sel.value); sel.addEventListener('change', s); s(); }
+
+  function init() {
+    buildRail(); syncMeter(); syncMandate(); bindOtp(); buildCats();
+    document.querySelectorAll('select').forEach(watchSelect);
+
+    document.querySelectorAll('.preset').forEach(p => p.addEventListener('click', () => { $('fund').value = p.dataset.v; syncMeter(); }));
+    $('fund').addEventListener('input', syncMeter);
+    $('mandate').addEventListener('input', syncMandate);
+
+    document.querySelectorAll('.pay-method').forEach(m => m.addEventListener('click', () => {
+      document.querySelectorAll('.pay-method').forEach(x => x.classList.remove('on'));
+      m.classList.add('on'); m.querySelector('input').checked = true;
+      $('card-fields').classList.toggle('open', m.dataset.pm === 'card');
+    }));
+
+    $('card-number').addEventListener('input', e => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
+    });
+    $('card-exp').addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 4);
+      e.target.value = v.length > 2 ? v.slice(0, 2) + ' / ' + v.slice(2) : v;
+    });
+    $('card-cvv').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 3); });
+
+    $('btn-back').addEventListener('click', () => goTo(cur - 1, 'back'));
+    $('btn-next').addEventListener('click', onNext);
+
+    document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+      document.querySelectorAll('.pane').forEach(p => p.classList.remove('on'));
+      tab.classList.add('on'); $('pane-' + tab.dataset.tab).classList.add('on');
+    }));
+
+    let revealedR = false;
+    $('d-reveal-r').addEventListener('click', () => {
+      if (!reserve) return;
+      revealedR = !revealedR;
+      $('d-rsec').textContent = revealedR ? reserve.reserve_secret : '•'.repeat(24);
+      $('d-reveal-r').classList.toggle('ok', revealedR);
+    });
+
+    document.querySelectorAll('[data-copy]').forEach(btn => btn.addEventListener('click', () => {
+      const id = btn.dataset.copy;
+      const text = (id === 'd-sec' && agent) ? agent.agent_secret
+                 : (id === 'd-rsec' && reserve) ? reserve.reserve_secret
+                 : $(id).textContent;
+      navigator.clipboard.writeText(text).then(() => { btn.classList.add('ok'); setTimeout(() => btn.classList.remove('ok'), 1600); toast('Copied'); });
+    }));
+    $('d-reveal').addEventListener('click', () => { if (!agent) return; revealed = !revealed; $('d-sec').textContent = revealed ? agent.agent_secret : '•'.repeat(28); $('d-reveal').classList.toggle('ok', revealed); });
+    $('d-refresh').addEventListener('click', async () => {
+      if (!reserve) return;
+      try { const me = await api('/api/reserve/me', { headers: { Authorization: 'Bearer ' + reserve.token } }); $('d-balance').textContent = me.balance_display; renderLedger(me.ledger || []); toast('Refreshed'); } catch (e) { toast(e.message, true); }
+    });
+    $('btn-copy-code').addEventListener('click', () => {
+      const pane = document.querySelector('.pane.on pre');
+      if (pane) navigator.clipboard.writeText(pane.textContent).then(() => toast('Snippet copied'));
+    });
+
+    let existing = null;
+    try { existing = sessionStorage.getItem('rs_token'); } catch (e) { /* private mode */ }
+    if (existing) $('back-banner').style.display = 'flex';
+
+    syncRail(); syncFoot();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>

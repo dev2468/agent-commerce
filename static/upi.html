@@ -1,0 +1,343 @@
+<title>UPI App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/theme.css">
+
+<style>
+.page{max-width:1000px;margin:0 auto;padding:40px 24px 80px;display:grid;grid-template-columns:1fr 380px;gap:34px;align-items:start}
+@media(max-width:820px){ .page{grid-template-columns:1fr;justify-items:center} }
+
+.explain{animation:up .5s var(--ease) both;padding-top:20px}
+.explain h1{font-family:var(--f-disp);font-size:clamp(26px,4vw,34px);font-weight:800;letter-spacing:-.035em;line-height:1.14;margin-bottom:12px}
+.explain h1 em{font-style:normal;background:linear-gradient(120deg,var(--brand-soft),var(--brand) 40%,var(--indigo));-webkit-background-clip:text;background-clip:text;color:transparent}
+.explain p{font-size:15px;color:var(--ink-3);margin-bottom:18px;max-width:460px}
+.flow-note{display:flex;gap:11px;padding:13px 15px;border-radius:var(--r-md);background:var(--tint);border:1px solid var(--glass-edge);margin-bottom:11px}
+.flow-note b{font-family:var(--f-disp)} .flow-note svg{color:var(--brand);flex-shrink:0;margin-top:1px}
+.flow-note p{font-size:12.5px;color:var(--ink-2);margin:0;max-width:none}
+
+/* Phone */
+.phone{width:340px;border-radius:38px;padding:12px;background:linear-gradient(160deg,#0b1220,#131c2e);
+  box-shadow:0 30px 70px -25px rgba(11,45,110,.5),0 0 0 2px rgba(255,255,255,.06);animation:up .6s var(--ease) .1s both}
+.screen{border-radius:28px;overflow:hidden;background:var(--ground-b);height:660px;display:flex;flex-direction:column;position:relative}
+.statusbar{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-family:var(--f-disp);font-size:12px;font-weight:700;color:var(--ink-2);background:var(--glass-2)}
+.statusbar .dots{display:flex;gap:4px} .statusbar .dots span{width:5px;height:5px;border-radius:50%;background:var(--ink-4)}
+.app-top{padding:16px 18px 12px;display:flex;align-items:center;gap:11px;background:linear-gradient(135deg,var(--brand),var(--brand-deep));color:#fff}
+.app-logo{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-family:var(--f-disp);font-weight:800;font-size:15px}
+.app-top b{font-family:var(--f-disp);font-size:15px;font-weight:800;display:block}
+.app-top span{font-size:11px;opacity:.85}
+.app-body{flex:1;overflow-y:auto;padding:16px 15px}
+.app-title{font-family:var(--f-disp);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-4);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.app-title .live{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:pulse 2.2s ease-in-out infinite}
+
+.req{border-radius:16px;padding:15px;margin-bottom:11px;background:var(--glass);border:1px solid var(--glass-line);
+  box-shadow:var(--shadow-sm);animation:reqin .4s var(--spring) both}
+@keyframes reqin{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
+.req.leaving{animation:reqout .35s var(--ease) forwards}
+@keyframes reqout{to{opacity:0;transform:translateX(30px) scale(.94);max-height:0;margin-bottom:-11px;padding-top:0;padding-bottom:0}}
+.req-top{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.req-mark{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:grid;place-items:center;color:#fff;font-family:var(--f-disp);font-weight:800;font-size:16px}
+.req-who b{font-family:var(--f-disp);font-size:13.5px;font-weight:700;display:block;line-height:1.2}
+.req-who span{font-size:11px;color:var(--ink-4)}
+.req-amt{font-family:var(--f-disp);font-size:26px;font-weight:800;letter-spacing:-.03em;text-align:center;margin:6px 0 3px;font-variant-numeric:tabular-nums}
+.req-for{text-align:center;font-size:11.5px;color:var(--ink-4);margin-bottom:14px}
+.req-btns{display:flex;gap:8px}
+.req-btns button{flex:1;height:40px;border:none;border-radius:11px;font-family:var(--f-disp);font-size:13px;font-weight:700;cursor:pointer;transition:transform .2s var(--spring),box-shadow .2s}
+.req-btns button:active{transform:scale(.96)}
+.b-approve2{color:#fff;background:linear-gradient(135deg,var(--ok),#0AA97C);box-shadow:0 6px 16px -6px var(--ok)}
+.b-decline2{color:var(--bad);background:var(--bad-soft)}
+
+.empty-app{text-align:center;padding:60px 20px;color:var(--ink-4)}
+.empty-app svg{opacity:.4;margin-bottom:12px}
+.empty-app p{font-size:12.5px}
+
+/* PIN overlay */
+.pin-ov{position:absolute;inset:0;background:rgba(8,17,34,.55);backdrop-filter:blur(4px);display:none;
+  align-items:flex-end;z-index:5}
+.pin-ov.on{display:flex;animation:up .25s var(--ease)}
+.pin-sheet{width:100%;background:var(--ground-b);border-radius:22px 22px 0 0;padding:20px 18px 22px;animation:sheetup .35s var(--spring)}
+@keyframes sheetup{from{transform:translateY(100%)}to{transform:none}}
+.pin-sheet h4{font-family:var(--f-disp);font-size:14px;font-weight:800;text-align:center;margin-bottom:3px}
+.pin-sheet p{font-size:11.5px;color:var(--ink-4);text-align:center;margin-bottom:16px}
+.pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:18px}
+.pin-dots i{width:13px;height:13px;border-radius:50%;border:2px solid var(--glass-line);transition:all .2s var(--spring)}
+.pin-dots i.on{background:var(--brand);border-color:var(--brand);transform:scale(1.1)}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.key{height:46px;border:none;border-radius:12px;background:var(--glass-2);border:1px solid var(--glass-line);
+  font-family:var(--f-disp);font-size:19px;font-weight:700;color:var(--ink);cursor:pointer;transition:all .15s var(--spring)}
+.key:active{transform:scale(.93);background:var(--tint)}
+.key.wide{grid-column:span 1;font-size:13px}
+.pin-done{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:var(--ground-b);z-index:6}
+.pin-done.on{display:flex;animation:up .3s var(--ease)}
+.pin-done .tick{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(140deg,var(--ok),#0AA97C);box-shadow:0 12px 30px -10px var(--ok);animation:corePop .5s var(--spring)}
+.pin-done .tick svg{width:32px;height:32px}
+.pin-done b{font-family:var(--f-disp);font-size:16px;font-weight:800;margin-top:14px}
+.pin-done span{font-size:12px;color:var(--ink-4);margin-top:3px}
+</style>
+
+<div class="field"></div>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+<div class="grain"></div>
+
+<nav class="nav">
+  <div class="nav-glass">
+    <a class="brand" href="/">
+      <span class="brand-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4-4 4 4M4 10l4 4 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Agent Commerce
+    </a>
+    <div class="nav-links">
+      <a href="/user">User</a>
+      <a href="/merchant">Merchant</a>
+      <a href="/verify">Verify</a>
+      <a href="/upi" class="active">UPI</a>
+    </div>
+  </div>
+</nav>
+
+<main class="page">
+  <section class="explain">
+    <h1>Your agent asks. <em>You tap approve.</em></h1>
+    <p>By default every purchase your agent makes arrives as a collect request in your UPI app — the same prompt you already know. Nothing leaves your reserve until you approve it here, on your own phone.</p>
+    <div class="flow-note"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 1.5l6 2.4v3.9c0 3.5-2.5 6.6-6 7.7-3.5-1.1-6-4.2-6-7.7V3.9L9 1.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><p><b>Passport-gated.</b> The agent's request only reaches you if its signed passport authorizes the amount, category and merchant. Anything out of bounds never becomes a prompt.</p></div>
+    <div class="flow-note"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M3 9.5l4 4L15 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>All UPI features supported.</b> Approve-per-purchase is the default; a mandate can let small amounts settle autonomously without this prompt.</p></div>
+  </section>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="statusbar"><span>9:41</span><span class="dots"><span></span><span></span><span></span></span></div>
+      <div class="app-top">
+        <div class="app-logo">U</div>
+        <div><b>UPI</b><span>Payments · demo bank</span></div>
+      </div>
+      <div class="app-body">
+        <div class="app-title"><span class="live"></span>Pending requests</div>
+        <div id="reqs"></div>
+        <div class="empty-app" id="empty">
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="none"><path d="M5 8h14l-1 11H6L5 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <p>No pending requests.<br>Have your agent buy something.</p>
+        </div>
+
+        <!-- A UPI inbox is per-person: without a reserve token there is nothing
+             to show, and showing everyone's requests would be the bug. -->
+        <div id="signin" style="display:none;padding:6px 2px">
+          <div style="text-align:center;margin-bottom:16px">
+            <div style="width:44px;height:44px;border-radius:14px;margin:0 auto 11px;display:grid;place-items:center;
+                        color:#fff;background:linear-gradient(140deg,var(--brand-soft),var(--brand) 45%,var(--brand-deep))">
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><rect x="3" y="10" width="18" height="11" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M7.5 10V7a4.5 4.5 0 019 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <b style="font-family:var(--f-disp);font-size:14px;font-weight:800;display:block">Open your UPI inbox</b>
+            <span style="font-size:11.5px;color:var(--ink-4)">Sign in to the reserve that funds your agents</span>
+          </div>
+          <div class="fg" style="margin-bottom:9px"><div class="float">
+            <input type="text" id="li-id" placeholder=" "><label for="li-id">Reserve ID or email</label>
+          </div></div>
+          <div class="fg" style="margin-bottom:11px"><div class="float">
+            <input type="password" id="li-secret" placeholder=" "><label for="li-secret">Reserve secret</label>
+          </div></div>
+          <button class="btn b-primary b-sm" id="btn-login" style="width:100%"><span id="login-lb">Sign in</span></button>
+          <p style="text-align:center;margin-top:12px;font-size:11.5px;color:var(--ink-4)">
+            No reserve yet? <a href="/user" style="color:var(--brand);font-weight:600;text-decoration:none">Authorize one</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- PIN sheet -->
+      <div class="pin-ov" id="pin-ov">
+        <div class="pin-sheet">
+          <h4 id="pin-amt">₹0</h4>
+          <p id="pin-to">Enter your UPI PIN to approve</p>
+          <div class="pin-dots" id="pin-dots"><i></i><i></i><i></i><i></i></div>
+          <div class="keypad" id="keypad"></div>
+        </div>
+      </div>
+      <div class="pin-done" id="pin-done">
+        <div class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <b id="done-amt">Paid</b><span id="done-to"></span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="toast-msg"></span></div>
+
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const rupees = p => '₹' + Number(p).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  const PALETTE = ['#2D81F7', '#6366F1', '#0FBF8F', '#F97316', '#EC4899', '#8B5CF6', '#0EA5E9', '#14B8A6'];
+  const tint = s => PALETTE[Array.from(String(s || '?')).reduce((a, c) => a + c.charCodeAt(0), 0) % PALETTE.length];
+
+  let toastT;
+  function toast(m, bad) { $('toast-msg').textContent = m; $('toast').classList.toggle('bad', !!bad); $('toast').classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => $('toast').classList.remove('show'), 2400); }
+
+  // The reserve token is shared with the home page through sessionStorage, so
+  // arriving here straight from the console does not ask you to sign in twice.
+  let token = null;
+  try { token = sessionStorage.getItem('rs_token'); } catch (e) { /* private mode */ }
+
+  async function api(p, o) {
+    const opts = Object.assign({}, o || {});
+    opts.headers = Object.assign({ Authorization: 'Bearer ' + token }, opts.headers || {});
+    const r = await fetch(p, opts);
+    if (r.status === 401) { signOut(); throw new Error('Sign in to your reserve.'); }
+    if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || 'Request failed.'); }
+    return r.json();
+  }
+
+  function signOut() {
+    token = null;
+    try { sessionStorage.removeItem('rs_token'); } catch (e) { /* ignore */ }
+    showGate(true);
+  }
+
+  function showGate(on) {
+    $('signin').style.display = on ? 'block' : 'none';
+    if (on) { $('reqs').innerHTML = ''; $('empty').style.display = 'none'; }
+  }
+
+  let active = null;   // the request being PIN-approved
+  let pin = '';
+
+  async function poll() {
+    if (!token) { showGate(true); return; }
+    let data;
+    try { data = await api('/api/upi/requests'); } catch (e) { return; }
+    showGate(false);
+    const reqs = data.requests || [];
+    const wrap = $('reqs');
+    // Bail before touching anything while a PIN is in flight — toggling the
+    // empty state here left the inbox looking empty for the frame between
+    // "paid" and the next render.
+    if (active) return;
+    $('empty').style.display = reqs.length ? 'none' : 'block';
+    wrap.innerHTML = reqs.map(r => {
+      const rup = Number(r.amount) / 100;
+      const c = (r.brand_color && r.brand_color !== '#2D81F7') ? r.brand_color : tint(r.merchant_name || r.merchant_id);
+      // Only surface a Razorpay link when one actually came back from the API.
+      const link = r.razorpay_short_url
+        ? `<a href="${esc(r.razorpay_short_url)}" target="_blank" rel="noopener"
+              style="display:block;margin-top:7px;font-family:var(--f-mono);font-size:10px;color:var(--brand);text-decoration:none">
+             Razorpay link ↗</a>` : '';
+      return `<div class="req" data-oid="${esc(r.order_id)}">
+        <div class="req-top">
+          <span class="req-mark" style="background:${c}">${esc((r.merchant_name || '?')[0].toUpperCase())}</span>
+          <span class="req-who"><b>${esc(r.merchant_name || 'Merchant')}</b><span>via agent ${esc((r.agent_id||'').slice(0,14))}</span></span>
+        </div>
+        <div class="req-amt">${rupees(rup)}</div>
+        <div class="req-for">${esc(r.product_name || '')}</div>
+        ${link}
+        <div class="req-btns">
+          <button class="b-decline2" data-act="decline">Decline</button>
+          <button class="b-approve2" data-act="approve">Approve</button>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:7px">
+          <a href="/pay/${esc(r.order_id)}" target="_blank" rel="noopener"
+             style="flex:1;font-size:10.5px;font-weight:700;padding:6px;border-radius:8px;text-align:center;
+             text-decoration:none;border:1px solid var(--glass-edge);background:var(--glass-2);color:var(--ink-3)">Pay for real</a>
+          <button data-act="check" style="flex:1;font-size:10.5px;font-weight:700;padding:6px;border-radius:8px;
+            cursor:pointer;border:1px solid var(--glass-edge);background:var(--glass-2);color:var(--ink-3)">Check status</button>
+        </div>
+      </div>`;
+    }).join('');
+    wrap.querySelectorAll('.req').forEach(el => {
+      const oid = el.dataset.oid;
+      const r = reqs.find(x => x.order_id === oid);
+      el.querySelector('[data-act="approve"]').addEventListener('click', () => openPin(r));
+      el.querySelector('[data-act="decline"]').addEventListener('click', () => decline(oid, el));
+      el.querySelector('[data-act="check"]').addEventListener('click', e => checkRazorpay(oid, e.target));
+    });
+  }
+
+  async function checkRazorpay(oid, btn) {
+    const label = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Checking';
+    try {
+      const s = await api('/api/upi/requests/' + oid + '/razorpay');
+      if (s.paid) {
+        // Really paid on Razorpay — make our ledger follow rather than waiting
+        // for someone to tap the simulated PIN pad.
+        const done = await api('/api/upi/requests/' + oid + '/reconcile', { method: 'POST' });
+        toast('Paid on Razorpay — settled ' + (done.amount_display || ''));
+        poll();
+      } else {
+        toast('Razorpay says: ' + (s.status || 'no payment yet'));
+      }
+    } catch (e) { toast(e.message, true); }
+    finally { btn.disabled = false; btn.textContent = label; }
+  }
+
+  async function signIn() {
+    const id = ($('li-id').value || '').trim(), secret = ($('li-secret').value || '').trim();
+    if (!id || !secret) { toast('Reserve ID and secret are required.', true); return; }
+    const body = id.includes('@') ? { email: id, reserve_secret: secret }
+                                  : { reserve_id: id, reserve_secret: secret };
+    $('btn-login').disabled = true; $('login-lb').textContent = 'Signing in';
+    try {
+      const r = await fetch('/api/reserve/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || 'Sign in failed.'); }
+      token = (await r.json()).token;
+      try { sessionStorage.setItem('rs_token', token); } catch (e) { /* ignore */ }
+      showGate(false); await poll();
+    } catch (e) { toast(e.message, true); }
+    finally { $('btn-login').disabled = false; $('login-lb').textContent = 'Sign in'; }
+  }
+
+  function openPin(r) {
+    active = r; pin = '';
+    $('pin-amt').textContent = rupees(Number(r.amount) / 100);
+    $('pin-to').textContent = 'Pay ' + (r.merchant_name || 'merchant') + ' · enter UPI PIN';
+    renderDots();
+    $('pin-ov').classList.add('on');
+  }
+  function closePin() { $('pin-ov').classList.remove('on'); active = null; pin = ''; }
+
+  function renderDots() {
+    Array.from($('pin-dots').children).forEach((d, i) => d.classList.toggle('on', i < pin.length));
+  }
+
+  function buildKeypad() {
+    const keys = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
+    $('keypad').innerHTML = keys.map(k => k === '' ? '<span></span>' : `<button class="key${k==='⌫'?' wide':''}" data-k="${k}">${k}</button>`).join('');
+    $('keypad').querySelectorAll('.key').forEach(b => b.addEventListener('click', () => press(b.dataset.k)));
+  }
+
+  async function press(k) {
+    if (k === '⌫') { pin = pin.slice(0, -1); renderDots(); return; }
+    if (pin.length >= 4) return;
+    pin += k; renderDots();
+    if (pin.length === 4) {
+      // any 4 digits approve (demo) — the real PIN check is the bank's
+      const r = active;
+      try {
+        const res = await api('/api/upi/requests/' + r.order_id + '/approve', { method: 'POST' });
+        $('pin-ov').classList.remove('on');
+        $('done-amt').textContent = 'Paid ' + rupees(Number(r.amount) / 100);
+        $('done-to').textContent = (res.merchant || r.merchant_name || '') + ' · from your reserve';
+        $('pin-done').classList.add('on');
+        setTimeout(() => { $('pin-done').classList.remove('on'); active = null; pin = ''; poll(); }, 1900);
+      } catch (e) {
+        closePin(); toast(e.message, true); poll();
+      }
+    }
+  }
+
+  async function decline(oid, el) {
+    el.classList.add('leaving');
+    try { await api('/api/upi/requests/' + oid + '/decline', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason: 'Declined in UPI app' }) }); toast('Declined'); }
+    catch (e) { el.classList.remove('leaving'); toast(e.message, true); }
+    setTimeout(poll, 400);
+  }
+
+  buildKeypad();
+  $('btn-login').addEventListener('click', signIn);
+  ['li-id', 'li-secret'].forEach(id => $(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); signIn(); }
+  }));
+  poll();
+  setInterval(() => { if (!document.hidden && token) poll(); }, 3000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && token) poll(); });
+})();
+</script>

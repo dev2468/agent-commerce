@@ -1,0 +1,757 @@
+<title>Onboard Merchant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/theme.css">
+
+<style>
+.page{max-width:760px;margin:0 auto;padding:44px 24px 90px}
+
+/* Brand-colour picker */
+.swatches{display:flex;gap:9px;flex-wrap:wrap}
+.sw{width:38px;height:38px;border-radius:12px;cursor:pointer;position:relative;border:2px solid transparent;
+  transition:transform .3s var(--spring),box-shadow .25s;animation:pop .35s var(--spring) both}
+.sw:hover{transform:translateY(-3px) scale(1.06)}
+.sw.on{border-color:var(--glass-line);box-shadow:0 0 0 2px var(--brand),0 6px 16px -6px rgba(11,45,110,.3)}
+.sw svg{position:absolute;inset:0;margin:auto;opacity:0;transform:scale(.4);transition:all .3s var(--spring)}
+.sw.on svg{opacity:1;transform:scale(1)}
+
+/* Live storefront preview */
+.preview{display:flex;align-items:center;gap:13px;padding:15px 17px;border-radius:var(--r-lg);
+  background:var(--glass-3);border:1px solid var(--glass-line);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:border-color .3s}
+.pv-logo{width:46px;height:46px;border-radius:13px;flex-shrink:0;display:grid;place-items:center;
+  font-family:var(--f-disp);font-size:19px;font-weight:800;color:#fff;
+  transition:background .4s var(--ease),transform .4s var(--spring)}
+.pv-body{min-width:0;flex:1}
+.pv-name{font-family:var(--f-disp);font-size:15px;font-weight:700;letter-spacing:-.015em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pv-meta{font-size:12px;color:var(--ink-3);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.pv-tag{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  padding:2px 8px;border-radius:999px;background:var(--tint);color:var(--brand)}
+
+/* Product composer */
+.composer{padding:17px;border-radius:var(--r-lg);background:var(--glass-3);
+  border:1px dashed var(--glass-edge);transition:border-color .3s,background .3s}
+.composer:focus-within{border-style:solid;border-color:var(--brand);background:var(--glass-2)}
+
+/* Product list */
+.plist{display:flex;flex-direction:column;gap:9px;margin-bottom:14px}
+.pcard{display:flex;align-items:center;gap:13px;padding:13px 15px;border-radius:var(--r-md);
+  background:var(--glass-2);border:1.5px solid var(--glass-line);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  animation:pop .35s var(--spring) both;transition:border-color .25s,transform .25s var(--spring)}
+.pcard:hover{border-color:var(--glass-edge)}
+.pcard.leaving{animation:leave .3s var(--ease) forwards}
+@keyframes leave{to{opacity:0;transform:translateX(28px) scale(.94)}}
+.pc-thumb{width:40px;height:40px;border-radius:11px;flex-shrink:0;display:grid;place-items:center;
+  font-family:var(--f-disp);font-size:15px;font-weight:800;color:#fff}
+.pc-body{flex:1;min-width:0}
+.pc-name{font-family:var(--f-disp);font-size:13.5px;font-weight:700;letter-spacing:-.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-meta{font-size:11.5px;color:var(--ink-4);display:flex;gap:8px}
+.pc-price{font-family:var(--f-disp);font-size:15px;font-weight:800;color:var(--ink);
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em;white-space:nowrap}
+.pc-del{width:29px;height:29px;flex-shrink:0;display:grid;place-items:center;border:none;background:transparent;
+  color:var(--ink-4);border-radius:8px;cursor:pointer;padding:0;transition:all .22s var(--spring)}
+.pc-del:hover{color:var(--bad);background:var(--bad-soft);transform:scale(1.12)}
+
+/* Summary bar */
+.sumbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:var(--r-md);
+  background:var(--tint);border:1px solid var(--glass-edge);margin-bottom:14px}
+.sumbar span{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.sumbar b{font-family:var(--f-disp);font-size:15px;font-weight:800;color:var(--brand);
+  font-variant-numeric:tabular-nums}
+
+/* Review */
+.review{display:flex;flex-direction:column;gap:9px}
+.rrow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:12px 15px;
+  border-radius:var(--r-md);background:var(--glass-2);border:1px solid var(--glass-line)}
+.rrow dt{font-size:12px;font-weight:600;color:var(--ink-4);flex-shrink:0}
+.rrow dd{font-size:13px;font-weight:600;color:var(--ink);text-align:right;word-break:break-word}
+.rrow dd em{font-style:normal;color:var(--ink-4);font-weight:500}
+</style>
+
+<div class="field"></div>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+<div class="grain"></div>
+
+<nav class="nav">
+  <div class="nav-glass">
+    <a class="brand" href="/">
+      <span class="brand-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4-4 4 4M4 10l4 4 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Agent Commerce
+    </a>
+    <div class="nav-links">
+      <a href="/wallet">Reserve</a>
+      <a href="/agents">Agents</a>
+      <a href="/merchants" class="active">Merchants</a>
+      <a href="/verify">Verify</a>
+    </div>
+  </div>
+</nav>
+
+<main class="page">
+  <header class="head">
+    <span class="eyebrow"><span class="pulse"></span>Merchant Onboarding</span>
+    <h1>Put your catalog in front of <em>every agent</em></h1>
+    <p>List once. Any registered agent can search your products, compare them, and place orders that settle through Razorpay.</p>
+  </header>
+
+  <section class="shell">
+    <div class="rail">
+      <div class="rail-track"><div class="rail-fill" id="rail-fill"></div></div>
+      <div class="rail-steps" id="rail-steps"></div>
+    </div>
+
+    <!-- 0 · Business -->
+    <div class="step active" id="step-0">
+      <div class="sh"><h2>Tell us about the business</h2><p>This is what an agent sees when your product wins a search.</p></div>
+      <div class="fg"><div class="float">
+        <input type="text" id="biz-name" placeholder=" " autocomplete="organization">
+        <label for="biz-name">Business name</label>
+      </div><span class="err" id="biz-name-err"></span></div>
+      <div class="grid-2">
+        <div class="fg"><div class="float">
+          <input type="text" id="contact-name" placeholder=" " autocomplete="name">
+          <label for="contact-name">Contact person</label>
+        </div><span class="err" id="contact-name-err"></span></div>
+        <div class="fg"><div class="float">
+          <input type="email" id="biz-email" placeholder=" " autocomplete="email">
+          <label for="biz-email">Work email</label>
+        </div><span class="err" id="biz-email-err"></span></div>
+      </div>
+      <div class="fg"><div class="float">
+        <select id="biz-category">
+          <option value="" disabled selected></option>
+          <option value="electronics">Electronics</option>
+          <option value="fashion">Fashion</option>
+          <option value="beauty">Beauty &amp; Personal Care</option>
+          <option value="sports">Sports &amp; Fitness</option>
+          <option value="home">Home &amp; Living</option>
+          <option value="food">Food &amp; Grocery</option>
+          <option value="books">Books &amp; Media</option>
+          <option value="gaming">Gaming</option>
+          <option value="health">Health &amp; Wellness</option>
+          <option value="baby">Baby &amp; Kids</option>
+          <option value="pets">Pets</option>
+          <option value="other">Other</option>
+        </select>
+        <label for="biz-category">Primary category</label>
+        <span class="caret"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div><span class="err" id="biz-category-err"></span></div>
+      <div class="fg"><div class="float">
+        <input type="text" id="biz-website" placeholder=" ">
+        <label for="biz-website">Website <span style="opacity:.6">(optional)</span></label>
+      </div></div>
+      <div class="fg"><div class="float">
+        <textarea id="biz-desc" placeholder=" "></textarea>
+        <label for="biz-desc">One-line description</label>
+      </div>
+      <p class="hint">Agents read this when deciding whether your store fits the request.</p></div>
+
+      <div class="pnote">
+        <span class="pnote-ico"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l5.5 2.2v3.6c0 3.2-2.3 6-5.5 7.2-3.2-1.2-5.5-4-5.5-7.2V3.7L8 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>
+        <div>
+          <span class="pnote-lb">In production</span>
+          <p>A merchant clears Razorpay KYC before a single product goes live — PAN, GST registration, and proof of the settlement bank account. This form stands in for that flow. Without it, an agent could be sold to by anyone who can fill in a text field, and the buyer's approval would be protecting them from nothing.</p>
+        </div>
+      </div>
+
+      <hr class="rule">
+      <div class="fg">
+        <label class="lb">Brand colour</label>
+        <div class="swatches" id="swatches"></div>
+      </div>
+      <div class="fg" style="margin-bottom:0">
+        <label class="lb">Storefront preview</label>
+        <div class="preview">
+          <div class="pv-logo" id="pv-logo">?</div>
+          <div class="pv-body">
+            <div class="pv-name" id="pv-name">Your business</div>
+            <div class="pv-meta">
+              <span class="pv-tag" id="pv-cat">category</span>
+              <span id="pv-desc">Add a description to see it here</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1 · Settlement -->
+    <div class="step" id="step-1">
+      <div class="sh"><h2>Where does the money land?</h2><p>Razorpay settles agent orders into this account.</p></div>
+      <div class="fg"><div class="float">
+        <input type="text" id="rzp-account" placeholder=" ">
+        <label for="rzp-account">Razorpay account ID</label>
+      </div>
+      <p class="hint">Starts with <code style="font-family:var(--f-mono)">acc_</code>. Leave blank to settle into the platform's test account for now.</p></div>
+      <div class="fg"><div class="float">
+        <input type="text" id="settle-vpa" placeholder=" ">
+        <label for="settle-vpa">Settlement UPI ID <span style="opacity:.6">(optional)</span></label>
+      </div></div>
+
+      <div class="pnote">
+        <span class="pnote-ico"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l5.5 2.2v3.6c0 3.2-2.3 6-5.5 7.2-3.2-1.2-5.5-4-5.5-7.2V3.7L8 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>
+        <div>
+          <span class="pnote-lb">In production</span>
+          <p>The account is confirmed by a penny-drop before the first payout, so money cannot be routed to an account nobody has proven they own. Each agent order then splits automatically between platform and merchant through <code>Razorpay Route</code> — the merchant is a linked account, not a line in our ledger.</p>
+        </div>
+      </div>
+
+      <hr class="rule">
+      <div class="fg">
+        <label class="lb">Settlement cycle</label>
+        <div class="modes">
+          <label class="mode on" data-cycle="t2">
+            <input type="radio" name="cycle" value="t2" checked>
+            <div class="mode-top">
+              <span class="mode-ico"><svg width="17" height="17" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6.8" stroke="currentColor" stroke-width="1.7"/><path d="M9 5v4.2l2.7 1.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+              <span class="mode-tick"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5L9.5 3.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </div>
+            <h3>Standard · T+2</h3>
+            <p>Funds land two working days after the order is captured.</p>
+          </label>
+          <label class="mode" data-cycle="instant">
+            <input type="radio" name="cycle" value="instant">
+            <div class="mode-top">
+              <span class="mode-ico"><svg width="17" height="17" viewBox="0 0 18 18" fill="none"><path d="M10 1.5L3.5 10h4l-.5 6.5L14 8h-4l.5-6.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+              <span class="mode-tick"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5L9.5 3.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </div>
+            <h3>Instant</h3>
+            <p>Settled within minutes. Razorpay charges a small fee per payout.</p>
+          </label>
+        </div>
+      </div>
+
+      <hr class="rule">
+      <div class="sect">
+        <span class="sect-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3.5" width="13" height="9" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M1.5 7h13" stroke="currentColor" stroke-width="1.5"/></svg></span>
+        <div><h3>Accepted methods<small>What a buyer can use to pay for your goods</small></h3></div>
+      </div>
+      <div class="pills">
+        <button type="button" class="pill on" data-g="method" data-v="upi">UPI</button>
+        <button type="button" class="pill on" data-g="method" data-v="card">Cards</button>
+        <button type="button" class="pill on" data-g="method" data-v="netbanking">Net Banking</button>
+        <button type="button" class="pill" data-g="method" data-v="emi">EMI</button>
+        <button type="button" class="pill" data-g="method" data-v="bnpl">BNPL</button>
+        <button type="button" class="pill" data-g="method" data-v="wallet">Wallets</button>
+      </div>
+
+      <hr class="rule">
+      <label class="trow on" id="trow-auto">
+        <span class="tgl"><input type="checkbox" id="auto-accept" checked><span class="tk"></span></span>
+        <span><strong>Auto-accept agent orders</strong><small>Approved orders go straight to fulfilment instead of a manual queue</small></span>
+      </label>
+      <label class="trow" id="trow-returns" style="margin-top:9px">
+        <span class="tgl"><input type="checkbox" id="returns"><span class="tk"></span></span>
+        <span><strong>Accept returns</strong><small>Agents surface your return window when comparing options</small></span>
+      </label>
+      <div class="coll" id="returns-coll"><div>
+        <div class="fg" style="margin-bottom:0">
+          <label class="lb">Return window</label>
+          <div class="pills">
+            <button type="button" class="pill" data-g="window" data-v="7">7 days</button>
+            <button type="button" class="pill on" data-g="window" data-v="15">15 days</button>
+            <button type="button" class="pill" data-g="window" data-v="30">30 days</button>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- 2 · Catalog -->
+    <div class="step" id="step-2">
+      <div class="sh"><h2>Add your first products</h2><p>You can add more any time from the dashboard — one is enough to go live.</p></div>
+
+      <div class="sumbar">
+        <span>Products staged</span>
+        <b id="sum-count">0</b>
+      </div>
+      <div class="plist" id="plist"></div>
+
+      <div class="composer">
+        <div class="fg"><div class="float">
+          <input type="text" id="p-name" placeholder=" ">
+          <label for="p-name">Product name</label>
+        </div><span class="err" id="p-name-err"></span></div>
+        <div class="grid-2">
+          <div class="fg"><div class="float">
+            <select id="p-category">
+              <option value="" disabled selected></option>
+            </select>
+            <label for="p-category">Category</label>
+            <span class="caret"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div></div>
+          <div class="fg">
+            <div class="money" id="m-p-price"><span class="cur">₹</span><input type="number" id="p-price" placeholder="0" min="1" step="1"></div>
+            <span class="err" id="p-price-err"></span>
+          </div>
+        </div>
+        <div class="fg"><div class="float">
+          <input type="text" id="p-desc" placeholder=" ">
+          <label for="p-desc">Short description <span style="opacity:.6">(optional)</span></label>
+        </div></div>
+        <button class="btn b-glass b-sm" id="btn-add-product" type="button" style="width:100%">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3.5v9M3.5 8h9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+          Add product
+        </button>
+      </div>
+    </div>
+
+    <!-- 3 · Review -->
+    <div class="step" id="step-3">
+      <div class="sh"><h2>Check it over</h2><p>This is exactly what gets written to the catalog.</p></div>
+      <dl class="review" id="review"></dl>
+    </div>
+
+    <!-- 4 · Done -->
+    <div class="step" id="step-4">
+      <div class="done-hero">
+        <div class="burst">
+          <span class="burst-ring"></span><span class="burst-ring"></span>
+          <span class="burst-core"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+        <h2>You're on the platform</h2>
+        <p id="done-sub">Your catalog is searchable by every registered agent.</p>
+      </div>
+
+      <div class="cred"><div class="cred-top"><span class="cred-lb">Merchant ID</span><div class="cred-acts"><button class="ib" data-copy="c-mid" title="Copy"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="5.2" y="5.2" width="8" height="8" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M3 10.6V3.6A.6.6 0 013.6 3h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></div></div><div class="cred-val" id="c-mid">&mdash;</div></div>
+      <div class="cred"><div class="cred-top"><span class="cred-lb">Merchant Secret</span><div class="cred-acts"><button class="ib" id="btn-reveal" title="Reveal"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M1.5 8s2.5-4.6 6.5-4.6S14.5 8 14.5 8s-2.5 4.6-6.5 4.6S1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.35"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.35"/></svg></button><button class="ib" data-copy="c-sec" title="Copy"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="5.2" y="5.2" width="8" height="8" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M3 10.6V3.6A.6.6 0 013.6 3h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></div></div><div class="cred-val" id="c-sec">&mdash;</div></div>
+
+      <div class="note"><svg width="17" height="17" viewBox="0 0 18 18" fill="none"><path d="M9 1.8L1.6 15.2h14.8L9 1.8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 6.8v3.4M9 12.6v.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><p><b>Copy the secret now.</b> It signs you into the merchant dashboard and is never shown again.</p></div>
+
+      <div class="sect"><span class="sect-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5.5 4L2 8l3.5 4M10.5 4L14 8l-3.5 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><h3>Manage the catalog from code<small>Same endpoints the dashboard uses</small></h3></div></div>
+      <div class="code">
+        <button class="ib" id="btn-copy-code" title="Copy code"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="5.2" y="5.2" width="8" height="8" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M3 10.6V3.6A.6.6 0 013.6 3h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+        <pre id="code-py"></pre>
+      </div>
+      <div class="done-foot">
+        <a class="btn b-glass" href="/">Back to home</a>
+        <a class="btn b-primary" id="go-dash" href="/merchants/dashboard">Open dashboard</a>
+      </div>
+    </div>
+
+    <div class="foot" id="foot">
+      <button class="btn b-quiet" id="btn-back" style="visibility:hidden">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3.5L5.5 8l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Back
+      </button>
+      <button class="btn b-primary" id="btn-next">
+        <span id="btn-next-lb">Continue</span>
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" id="btn-next-ic"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <p style="text-align:center;margin-top:20px;font-size:13px;color:var(--ink-3)">
+    Already onboarded? <a href="/merchants/dashboard" style="color:var(--brand);font-weight:600;text-decoration:none">Sign in to your dashboard</a>
+  </p>
+</main>
+
+<div class="toast" id="toast"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="toast-msg"></span></div>
+
+<script>
+(function () {
+  'use strict';
+
+  const STEPS = ['Business', 'Settlement', 'Catalog', 'Review', 'Live'];
+  const LAST = 3;
+
+
+  const COLORS = ['#2D81F7', '#6366F1', '#0FBF8F', '#F97316', '#EC4899', '#8B5CF6', '#0EA5E9', '#111827'];
+  const CATS = {
+    electronics: 'Electronics', fashion: 'Fashion', beauty: 'Beauty & Personal Care',
+    sports: 'Sports & Fitness', home: 'Home & Living', food: 'Food & Grocery',
+    books: 'Books & Media', gaming: 'Gaming', health: 'Health & Wellness',
+    baby: 'Baby & Kids', pets: 'Pets', other: 'Other'
+  };
+
+  let cur = 0, creds = null, revealed = false, brand = COLORS[0];
+  const products = [];
+
+  const $ = id => document.getElementById(id);
+  const val = id => ($(id).value || '').trim();
+  const money = n => '₹' + Number(n).toLocaleString('en-IN');
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  let toastT;
+  function toast(msg, isBad) {
+    $('toast-msg').textContent = msg;
+    $('toast').classList.toggle('bad', !!isBad);
+    $('toast').classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => $('toast').classList.remove('show'), 2400);
+  }
+
+  /* ── Rail ── */
+  function buildRail() {
+    $('rail-steps').innerHTML = STEPS.map((s, i) =>
+      `<div class="rs${i === 0 ? ' on' : ''}" data-i="${i}">
+         <span class="rs-dot"><span class="n">${i + 1}</span>
+           <svg class="ck" viewBox="0 0 14 14" fill="none"><path d="M2.5 7.2l3 3L11.5 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+         </span><span class="rs-lb">${s}</span>
+       </div>`).join('');
+  }
+
+  function syncRail() {
+    document.querySelectorAll('.rs').forEach((el, i) => {
+      el.classList.toggle('done', i < cur);
+      el.classList.toggle('on', i === cur);
+    });
+    $('rail-fill').style.width = (cur >= 4 ? 100 : (cur / (LAST + 1)) * 100) + '%';
+  }
+
+  /* ── Brand swatches + live preview ── */
+  function buildSwatches() {
+    $('swatches').innerHTML = COLORS.map((c, i) =>
+      `<button type="button" class="sw${i === 0 ? ' on' : ''}" data-c="${c}" style="background:${c};animation-delay:${i * 0.03}s" aria-label="Brand colour ${c}">
+         <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-6.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+       </button>`).join('');
+    $('swatches').querySelectorAll('.sw').forEach(sw => {
+      sw.addEventListener('click', () => {
+        document.querySelectorAll('.sw').forEach(x => x.classList.remove('on'));
+        sw.classList.add('on');
+        brand = sw.dataset.c;
+        syncPreview();
+      });
+    });
+  }
+
+  function syncPreview() {
+    const name = val('biz-name') || 'Your business';
+    const cat = val('biz-category');
+    const desc = val('biz-desc');
+    const logo = $('pv-logo');
+    logo.textContent = (val('biz-name') || '?')[0].toUpperCase();
+    logo.style.background = brand;
+    logo.style.transform = 'scale(1.06)';
+    setTimeout(() => (logo.style.transform = ''), 220);
+    $('pv-name').textContent = name;
+    $('pv-cat').textContent = cat ? CATS[cat] : 'category';
+    $('pv-cat').style.display = cat ? '' : 'none';
+    $('pv-desc').textContent = desc || 'Add a description to see it here';
+  }
+
+  /* ── Product composer ── */
+  function buildCatOptions() {
+    const sel = $('p-category');
+    sel.innerHTML = '<option value="" disabled selected></option>' +
+      Object.entries(CATS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+  }
+
+  function addProduct() {
+    const name = val('p-name');
+    const price = parseFloat(val('p-price'));
+    let ok = true;
+    clearErrs();
+    if (name.length < 2) { markBad('p-name', 'Give the product a name.'); ok = false; }
+    if (!price || price < 1) { markBad('p-price', 'Price must be at least ₹1.', 'm-p-price'); ok = false; }
+    if (!ok) return;
+
+    products.push({
+      name,
+      price,
+      category: val('p-category') || val('biz-category') || 'other',
+      description: val('p-desc')
+    });
+    ['p-name', 'p-price', 'p-desc'].forEach(id => ($(id).value = ''));
+    $('p-category').value = '';
+    $('p-category').classList.remove('filled');
+    renderProducts();
+    $('p-name').focus();
+    toast(`"${name}" staged`);
+  }
+
+  function renderProducts() {
+    $('sum-count').textContent = products.length;
+    const list = $('plist');
+    if (!products.length) {
+      list.innerHTML = '<div class="empty">Nothing staged yet — add your first product below.</div>';
+      return;
+    }
+    list.innerHTML = products.map((p, i) =>
+      `<div class="pcard" data-i="${i}" style="animation-delay:${Math.min(i, 8) * 0.03}s">
+         <span class="pc-thumb" style="background:${brand}">${esc(p.name[0].toUpperCase())}</span>
+         <span class="pc-body">
+           <span class="pc-name">${esc(p.name)}</span>
+           <span class="pc-meta"><span>${esc(CATS[p.category] || p.category)}</span></span>
+         </span>
+         <span class="pc-price">${money(p.price)}</span>
+         <button class="pc-del" type="button" data-del="${i}" aria-label="Remove ${esc(p.name)}">
+           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+         </button>
+       </div>`).join('');
+    list.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('.pcard');
+        card.classList.add('leaving');
+        setTimeout(() => { products.splice(+btn.dataset.del, 1); renderProducts(); }, 280);
+      });
+    });
+  }
+
+  /* ── Review ── */
+  const pills = g => Array.from(document.querySelectorAll(`.pill[data-g="${g}"].on`)).map(e => e.dataset.v);
+  const cycle = () => (document.querySelector('input[name="cycle"]:checked') || {}).value || 't2';
+
+  function buildReview() {
+    const rows = [
+      ['Business', esc(val('biz-name'))],
+      ['Contact', `${esc(val('contact-name'))} <em>· ${esc(val('biz-email'))}</em>`],
+      ['Category', esc(CATS[val('biz-category')] || '—')],
+      ['Website', val('biz-website') ? esc(val('biz-website')) : '<em>not set</em>'],
+      ['Razorpay account', val('rzp-account') ? esc(val('rzp-account')) : '<em>platform test account</em>'],
+      ['Settlement UPI', val('settle-vpa') ? esc(val('settle-vpa')) : '<em>not set</em>'],
+      ['Settlement cycle', cycle() === 'instant' ? 'Instant' : 'Standard · T+2'],
+      ['Payment methods', pills('method').join(', ') || '<em>none</em>'],
+      ['Auto-accept orders', $('auto-accept').checked ? 'Yes' : 'No'],
+      ['Returns', $('returns').checked ? `${pills('window')[0] || 15} day window` : '<em>not accepted</em>'],
+      ['Products', products.length
+        ? `${products.length} staged <em>· ${money(products.reduce((s, p) => s + p.price, 0))} total list value</em>`
+        : '<em>none — you can add them later</em>']
+    ];
+    $('review').innerHTML = rows.map(([k, v]) =>
+      `<div class="rrow"><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+  }
+
+  /* ── Validation ── */
+  function markBad(id, msg, moneyBox) {
+    const box = moneyBox ? $(moneyBox) : $(id).closest('.float');
+    if (box) { box.classList.add('bad'); setTimeout(() => box.classList.remove('bad'), 420); }
+    const e = $(id + '-err');
+    if (e) { e.textContent = msg; e.style.display = 'block'; }
+    $(id).addEventListener('input', () => { if (e) e.style.display = 'none'; }, { once: true });
+  }
+
+  function clearErrs() { document.querySelectorAll('.err').forEach(e => (e.style.display = 'none')); }
+
+  function validate(n) {
+    clearErrs();
+    let ok = true;
+    if (n === 0) {
+      if (val('biz-name').length < 2) { markBad('biz-name', 'At least two characters.'); ok = false; }
+      if (val('contact-name').length < 2) { markBad('contact-name', 'Who should we contact?'); ok = false; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('biz-email'))) { markBad('biz-email', 'That email does not look right.'); ok = false; }
+      if (!val('biz-category')) { markBad('biz-category', 'Pick a primary category.'); ok = false; }
+    }
+    return ok;
+  }
+
+  /* ── Submit ── */
+  function payload() {
+    return {
+      name: val('biz-name'),
+      contact_name: val('contact-name'),
+      email: val('biz-email'),
+      category: val('biz-category'),
+      description: val('biz-desc'),
+      website: val('biz-website'),
+      brand_color: brand,
+      razorpay_account: val('rzp-account'),
+      settlement: {
+        upi_vpa: val('settle-vpa'),
+        cycle: cycle(),
+        methods: pills('method'),
+        auto_accept: $('auto-accept').checked,
+        returns: $('returns').checked ? { enabled: true, window_days: +(pills('window')[0] || 15) } : { enabled: false }
+      },
+      products: products.map(p => ({
+        name: p.name, description: p.description, category: p.category, price: p.price
+      })),
+      // Every merchant gets a payout account — agent purchases settle into it.
+      enable_wallet: true
+    };
+  }
+
+  async function submit() {
+    const btn = $('btn-next');
+    btn.disabled = true;
+    $('btn-next-lb').textContent = 'Creating';
+    $('btn-next-ic').outerHTML = '<span class="spin" id="btn-next-ic"></span>';
+    try {
+      const r = await fetch('/api/merchants/onboard', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload())
+      });
+      if (!r.ok) {
+        const e = await r.json().catch(() => ({}));
+        throw new Error(e.detail || 'Onboarding failed.');
+      }
+      creds = await r.json();
+      paintCreds(creds);
+      goTo(4, 'fwd');
+    } catch (err) {
+      toast(err.message, true);
+      btn.disabled = false;
+      $('btn-next-ic').outerHTML = '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" id="btn-next-ic"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      syncFoot();
+    }
+  }
+
+  function paintCreds(c) {
+    $('c-mid').textContent = c.merchant_id;
+    $('c-sec').textContent = '•'.repeat(32);
+    revealed = false;
+    $('done-sub').textContent = c.products_created
+      ? `${c.products_created} product${c.products_created === 1 ? '' : 's'} are live and searchable by every registered agent.`
+      : 'Add products from the dashboard to become searchable.';
+
+    // Hand the dashboard the credentials so the merchant is not asked to
+    // paste them back in immediately after being shown them.
+    try {
+      sessionStorage.setItem('mc_prefill', JSON.stringify({
+        merchant_id: c.merchant_id, merchant_secret: c.merchant_secret
+      }));
+    } catch (e) { /* private mode — the dashboard will just ask for them */ }
+
+    $('code-py').textContent =
+`import requests
+
+BASE   = "${location.origin}"
+MID    = "${c.merchant_id}"
+SECRET = "${c.merchant_secret}"
+
+# 1 · sign in — 12-hour merchant-scoped token
+token = requests.post(f"{BASE}/api/merchants/login", json={
+    "merchant_id": MID,
+    "merchant_secret": SECRET,
+}).json()["token"]
+
+auth = {"Authorization": f"Bearer {token}"}
+
+# 2 · everything the dashboard shows, in one call
+me = requests.get(f"{BASE}/api/merchant/me", headers=auth).json()
+print(me["stats"])          # products · orders · revenue · pending
+
+# 3 · list a new product (price in rupees, stored as paise)
+requests.post(f"{BASE}/api/merchant/products", headers=auth, json={
+    "name": "Noise-cancelling headphones",
+    "category": "${val('biz-category') || 'electronics'}",
+    "price": 8999,
+    "description": "40h battery, USB-C",
+})
+
+# it is searchable by every agent the moment it is written`;
+  }
+
+  /* ── Nav ── */
+  function goTo(n, dir) {
+    if (n < 0 || n > 4) return;
+    $('step-' + cur).classList.remove('active', 'in-r', 'in-l');
+    const el = $('step-' + n);
+    el.classList.add('active', dir === 'back' ? 'in-l' : 'in-r');
+    setTimeout(() => el.classList.remove('in-r', 'in-l'), 440);
+    cur = n;
+    if (n === 3) buildReview();
+    syncRail(); syncFoot();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function syncFoot() {
+    $('btn-back').style.visibility = cur === 0 ? 'hidden' : 'visible';
+    if (cur === 4) { $('foot').style.display = 'none'; return; }
+    $('foot').style.display = 'flex';
+    const fin = cur === LAST;
+    $('btn-next-lb').textContent = fin ? 'Go live' : 'Continue';
+    $('btn-next-ic').style.display = fin ? 'none' : '';
+  }
+
+  function watchSelect(sel) {
+    const sync = () => sel.classList.toggle('filled', !!sel.value);
+    sel.addEventListener('change', sync);
+    sync();
+  }
+
+  function addPayoutNote() {
+    // Every merchant is provisioned a payout account at onboarding.
+    const anchor = document.getElementById('trow-auto');
+    if (!anchor) return;
+    const note = document.createElement('div');
+    note.className = 'pnote live';
+    note.style.marginBottom = '4px';
+    note.innerHTML = '<span class="pnote-ico"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
+      + '<div><span class="pnote-lb">A payout account is created for you</span>'
+      + '<p>When an agent buys, the debit is split straight to this account — in production via Razorpay Route, so the funds land against your merchant record rather than sitting with the platform.</p></div>';
+    anchor.parentNode.insertBefore(note, anchor);
+  }
+
+  function init() {
+    buildRail(); buildSwatches(); buildCatOptions(); renderProducts(); syncPreview();
+    addPayoutNote();
+    document.querySelectorAll('select').forEach(watchSelect);
+
+    ['biz-name', 'biz-desc'].forEach(id => $(id).addEventListener('input', syncPreview));
+    $('biz-category').addEventListener('change', syncPreview);
+
+    $('btn-back').addEventListener('click', () => goTo(cur - 1, 'back'));
+    $('btn-next').addEventListener('click', () => {
+      if (!validate(cur)) return;
+      if (cur === LAST) submit(); else goTo(cur + 1, 'fwd');
+    });
+
+    $('btn-add-product').addEventListener('click', addProduct);
+    ['p-name', 'p-price', 'p-desc'].forEach(id => {
+      $(id).addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); addProduct(); }
+      });
+    });
+
+    document.querySelectorAll('.mode').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.mode').forEach(m => m.classList.remove('on'));
+        card.classList.add('on');
+        card.querySelector('input').checked = true;
+      });
+    });
+
+    document.querySelectorAll('.pill').forEach(p => {
+      p.addEventListener('click', () => {
+        if (p.dataset.g === 'window') {
+          document.querySelectorAll('.pill[data-g="window"]').forEach(x => x.classList.remove('on'));
+          p.classList.add('on');
+        } else p.classList.toggle('on');
+      });
+    });
+
+    [['auto-accept', null, 'trow-auto'], ['returns', 'returns-coll', 'trow-returns']].forEach(([t, c, r]) => {
+      $(t).addEventListener('change', function () {
+        if (c) $(c).classList.toggle('open', this.checked);
+        $(r).classList.toggle('on', this.checked);
+      });
+    });
+
+    document.querySelectorAll('[data-copy]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.copy;
+        const text = (id === 'c-sec' && creds) ? creds.merchant_secret : $(id).textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          btn.classList.add('ok');
+          setTimeout(() => btn.classList.remove('ok'), 1600);
+          toast('Copied to clipboard');
+        });
+      });
+    });
+
+    $('btn-reveal').addEventListener('click', () => {
+      if (!creds) return;
+      revealed = !revealed;
+      $('c-sec').textContent = revealed ? creds.merchant_secret : '•'.repeat(32);
+      $('btn-reveal').classList.toggle('ok', revealed);
+    });
+
+    $('btn-copy-code').addEventListener('click', () => {
+      navigator.clipboard.writeText($('code-py').textContent).then(() => toast('Snippet copied'));
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && cur < 4 && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'TEXTAREA'
+          && !['p-name', 'p-price', 'p-desc'].includes(e.target.id)) {
+        e.preventDefault(); $('btn-next').click();
+      }
+    });
+
+    syncRail(); syncFoot();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>

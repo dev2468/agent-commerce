@@ -1,0 +1,129 @@
+<title>Agent Commerce</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/theme.css">
+
+<style>
+body{display:flex;flex-direction:column}
+.page{flex:1;max-width:980px;width:100%;margin:0 auto;padding:52px 24px 80px}
+.hero{text-align:center;margin-bottom:38px;animation:up .6s var(--ease) both}
+.hero h1{font-family:var(--f-disp);font-size:clamp(32px,6vw,46px);font-weight:800;letter-spacing:-.04em;
+  line-height:1.1;margin-bottom:14px;text-wrap:balance}
+.hero h1 em{font-style:normal;background:linear-gradient(120deg,var(--brand-soft),var(--brand) 40%,var(--indigo));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:16px;color:var(--ink-3);max-width:560px;margin:0 auto;text-wrap:balance}
+
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:24px}
+.card{position:relative;display:block;text-decoration:none;color:var(--ink);padding:22px;border-radius:var(--r-xl);
+  overflow:hidden;background:var(--glass);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid var(--glass-line);box-shadow:var(--shadow-md);animation:up .6s var(--ease) both;
+  transition:transform .32s var(--spring),box-shadow .28s,border-color .28s}
+.card:nth-child(1){animation-delay:.06s} .card:nth-child(2){animation-delay:.11s}
+.card:hover{transform:translateY(-5px);border-color:var(--glass-edge);box-shadow:var(--shadow-lg)}
+.card::after{content:'';position:absolute;top:-45%;right:-30%;width:170px;height:170px;border-radius:50%;
+  background:radial-gradient(circle,var(--tint-2),transparent 70%);pointer-events:none;opacity:0;transition:opacity .35s var(--ease)}
+.card:hover::after{opacity:1}
+.card-top{display:flex;align-items:center;gap:11px;margin-bottom:11px}
+.card-ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;flex-shrink:0;
+  background:linear-gradient(140deg,var(--brand-soft),var(--brand) 45%,var(--brand-deep));
+  box-shadow:0 7px 18px -7px var(--brand);transition:transform .4s var(--spring)}
+.card:hover .card-ico{transform:rotate(-7deg) scale(1.08)}
+.card-step{margin-left:auto;font-family:var(--f-disp);font-size:10px;font-weight:800;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--ink-4);padding:3px 9px;border-radius:999px;background:var(--glass-3)}
+.card h3{font-family:var(--f-disp);font-size:16px;font-weight:700;letter-spacing:-.02em}
+.card p{font-size:13px;color:var(--ink-3);line-height:1.5;margin:6px 0 13px}
+.card-go{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-disp);font-size:12.5px;font-weight:700;color:var(--brand)}
+.card-go svg{transition:transform .3s var(--spring)}
+.card:hover .card-go svg{transform:translateX(4px)}
+
+.flow{padding:24px 28px;border-radius:var(--r-xl);background:var(--glass);
+  backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid var(--glass-line);box-shadow:var(--shadow-md);animation:up .6s var(--ease) .16s both}
+.flow-lb{font-family:var(--f-disp);font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-4);text-align:center;margin-bottom:18px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.fstep{position:relative;text-align:center;padding:0 6px}
+.fstep::after{content:'';position:absolute;top:16px;left:calc(50% + 24px);right:calc(-50% + 24px);height:2px;
+  background:linear-gradient(90deg,var(--glass-line),var(--glass-edge));border-radius:1px}
+.fstep:last-child::after{display:none}
+.fnum{width:32px;height:32px;border-radius:50%;margin:0 auto 9px;display:grid;place-items:center;
+  font-family:var(--f-disp);font-size:12.5px;font-weight:800;color:var(--brand);background:var(--tint);
+  border:1.5px solid var(--glass-edge);position:relative;z-index:1;transition:all .35s var(--spring)}
+.fstep:hover .fnum{color:#fff;border-color:transparent;transform:scale(1.12);
+  background:linear-gradient(135deg,var(--brand),var(--brand-deep));box-shadow:0 6px 16px -6px var(--brand)}
+.fstep strong{display:block;font-family:var(--f-disp);font-size:12.5px;font-weight:700;margin-bottom:3px}
+.fstep span{display:block;font-size:11.5px;color:var(--ink-3);line-height:1.45}
+
+.foot-note{text-align:center;margin-top:22px;font-size:12.5px;color:var(--ink-4);animation:up .6s var(--ease) .2s both}
+.foot-note a{color:var(--brand);font-weight:600;text-decoration:none}
+.foot-note code{font-family:var(--f-mono);font-size:11.5px;padding:2px 7px;border-radius:6px;
+  background:var(--glass-2);border:1px solid var(--glass-line);color:var(--ink-3)}
+
+@media(max-width:760px){ .cards,.steps{grid-template-columns:1fr} .fstep::after{display:none} }
+@media(max-width:520px){ .page{padding:32px 14px 60px} .flow{padding:20px 18px} }
+</style>
+
+<div class="field"></div>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+<div class="grain"></div>
+
+<nav class="nav">
+  <div class="nav-glass">
+    <a class="brand" href="/">
+      <span class="brand-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4-4 4 4M4 10l4 4 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Agent Commerce
+    </a>
+    <div class="nav-links">
+      <a href="/user">User</a>
+      <a href="/merchant">Merchant</a>
+      <a href="/verify">Verify</a>
+      <a href="/upi">UPI</a>
+    </div>
+  </div>
+</nav>
+
+<main class="page">
+  <section class="hero">
+    <span class="eyebrow"><span class="pulse"></span>Razorpay AI Buildathon · Track 1</span>
+    <h1>Merchants register with Razorpay.<br><em>Nobody registers the agents.</em></h1>
+    <p>An agent registry for UPI commerce: every agent carries a signed passport stating who it acts for and what it may spend, so any merchant can trust it on sight — and every rupee still settles over UPI.</p>
+  </section>
+
+  <div class="cards">
+    <a class="card" href="/user">
+      <div class="card-top">
+        <div class="card-ico"><svg width="19" height="19" viewBox="0 0 22 22" fill="none"><rect x="4" y="7" width="14" height="11" rx="2.5" stroke="#fff" stroke-width="1.8"/><path d="M11 3v4M9 11.5v1.5M13 11.5v1.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <span class="card-step">Start here</span>
+      </div>
+      <h3>Reserve, register, then watch it shop</h3>
+      <p>Block up to ₹10,000 with one UPI PIN and get a signed passport. Then drive the agent from your console — it searches real merchants, and every purchase it makes lands in your UPI app for approval.</p>
+      <span class="card-go">Get started <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </a>
+
+    <a class="card" href="/merchant">
+      <div class="card-top">
+        <div class="card-ico"><svg width="19" height="19" viewBox="0 0 22 22" fill="none"><path d="M4 8h14l-1 10H5L4 8z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 8V6a3 3 0 016 0v2" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <span class="card-step">Merchants</span>
+      </div>
+      <h3>List your catalog</h3>
+      <p>Onboard once and every registered agent can find, compare and buy your products — a channel you can't reach today. Manage everything from the built-in dashboard.</p>
+      <span class="card-go">Onboard or sign in <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </a>
+  </div>
+
+  <section class="flow">
+    <div class="flow-lb">How a purchase happens</div>
+    <div class="steps">
+      <div class="fstep"><div class="fnum">1</div><strong>Reserve once</strong><span>One UPI PIN blocks up to ₹10,000. The only time you authenticate.</span></div>
+      <div class="fstep"><div class="fnum">2</div><strong>Agent gets a passport</strong><span>Signed Ed25519, carrying its caps, scope and expiry.</span></div>
+      <div class="fstep"><div class="fnum">3</div><strong>It shops, gated</strong><span>Over cap, out of scope, expired or revoked never becomes a request.</span></div>
+      <div class="fstep"><div class="fnum">4</div><strong>You approve in UPI</strong><span>A collect request lands on your phone; approve and it settles.</span></div>
+    </div>
+  </section>
+
+  <p class="foot-note">
+    <a href="/home">Your agent console</a> · <a href="/verify">Verify a passport</a> · <a href="/upi">Open the UPI app</a> ·
+    registry key at <code>/api/registry/pubkey</code> · health at <code>/health</code>
+  </p>
+</main>

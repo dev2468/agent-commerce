@@ -1,0 +1,634 @@
+<title>Merchant Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/theme.css">
+
+<style>
+.page{max-width:1000px;margin:0 auto;padding:40px 24px 90px}
+.page.narrow{max-width:460px;padding-top:70px}
+
+/* Merchant header */
+.mhead{display:flex;align-items:center;gap:16px;margin-bottom:24px;animation:up .55s var(--ease) both}
+.mlogo{width:56px;height:56px;border-radius:16px;flex-shrink:0;display:grid;place-items:center;
+  font-family:var(--f-disp);font-size:23px;font-weight:800;color:#fff;box-shadow:var(--shadow-md)}
+.mtitle{flex:1;min-width:0}
+.mtitle h1{font-family:var(--f-disp);font-size:25px;font-weight:800;letter-spacing:-.03em;line-height:1.2}
+.mtitle .mmeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:3px;font-size:12.5px;color:var(--ink-3)}
+.dot-sep{width:3px;height:3px;border-radius:50%;background:var(--ink-4)}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;padding:3px 10px;border-radius:999px;background:var(--ok-soft);color:var(--ok)}
+.badge .lively{width:5px;height:5px;border-radius:50%;background:currentColor;animation:pulse 2.2s ease-in-out infinite}
+
+/* Stat tiles */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.stat{position:relative;padding:16px 17px;border-radius:var(--r-lg);overflow:hidden;background:var(--glass);
+  backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);
+  border:1px solid var(--glass-line);box-shadow:var(--shadow-md);
+  animation:up .55s var(--ease) both;transition:transform .3s var(--spring)}
+.stat:hover{transform:translateY(-3px)}
+.stat:nth-child(1){animation-delay:.04s} .stat:nth-child(2){animation-delay:.09s}
+.stat:nth-child(3){animation-delay:.14s} .stat:nth-child(4){animation-delay:.19s}
+.stat::after{content:'';position:absolute;top:-50%;right:-30%;width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,var(--tint-2),transparent 70%);pointer-events:none}
+.stat-lb{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--ink-4);margin-bottom:8px}
+.stat-v{font-family:var(--f-disp);font-size:26px;font-weight:800;letter-spacing:-.035em;
+  font-variant-numeric:tabular-nums;line-height:1.1}
+.stat-sub{font-size:11.5px;color:var(--ink-4);margin-top:2px}
+.stat.accent .stat-v{color:var(--brand)}
+.stat.good .stat-v{color:var(--ok)}
+.stat.warn .stat-v{color:var(--warn)}
+
+/* Tab bar */
+.vtabs{display:flex;gap:3px;padding:4px;border-radius:14px;background:var(--glass-3);
+  border:1px solid var(--glass-line);width:fit-content;margin-bottom:18px}
+.vtab{position:relative;padding:8px 18px;font-family:var(--f-disp);font-size:13px;font-weight:700;border:none;
+  background:transparent;color:var(--ink-3);border-radius:10px;cursor:pointer;transition:color .2s var(--ease);
+  display:inline-flex;align-items:center;gap:7px}
+.vtab:hover{color:var(--ink)}
+.vtab.on{color:#fff}
+.vtab.on::before{content:'';position:absolute;inset:0;border-radius:10px;z-index:-1;
+  background:linear-gradient(135deg,var(--brand),var(--brand-deep));
+  box-shadow:0 4px 14px -4px var(--brand);animation:pillIn .4s var(--spring)}
+.vtab .cnt{font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:999px;
+  background:var(--glass-2);color:var(--ink-3);transition:all .2s}
+.vtab.on .cnt{background:rgba(255,255,255,.22);color:#fff}
+
+.view{display:none}
+.view.on{display:block;animation:up .35s var(--ease)}
+
+/* Toolbar */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.search{position:relative;flex:1;min-width:180px}
+.search input{width:100%;height:42px;padding:0 14px 0 40px;font-family:var(--f-body);font-size:13.5px;
+  font-weight:500;color:var(--ink);border-radius:var(--r-md);outline:none;background:var(--glass-2);
+  border:1.5px solid var(--glass-line);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  transition:border-color .25s,box-shadow .25s}
+.search input::placeholder{color:var(--ink-4)}
+.search input:focus{border-color:var(--brand);box-shadow:var(--ring)}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--ink-4);pointer-events:none}
+
+/* Rows */
+.rows{display:flex;flex-direction:column;gap:9px}
+.row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--r-lg);background:var(--glass);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid var(--glass-line);box-shadow:var(--shadow-sm);
+  animation:up .4s var(--ease) both;transition:transform .28s var(--spring),border-color .25s,box-shadow .25s}
+.row:hover{transform:translateY(-2px);border-color:var(--glass-edge);box-shadow:var(--shadow-md)}
+.row.leaving{animation:leave .3s var(--ease) forwards}
+@keyframes leave{to{opacity:0;transform:translateX(30px) scale(.95)}}
+.r-thumb{width:44px;height:44px;border-radius:13px;flex-shrink:0;display:grid;place-items:center;
+  font-family:var(--f-disp);font-size:17px;font-weight:800;color:#fff}
+.r-body{flex:1;min-width:0}
+.r-name{font-family:var(--f-disp);font-size:14px;font-weight:700;letter-spacing:-.015em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r-meta{font-size:11.5px;color:var(--ink-4);display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:1px}
+.r-price{font-family:var(--f-disp);font-size:16px;font-weight:800;letter-spacing:-.025em;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.r-acts{display:flex;gap:2px;flex-shrink:0}
+
+/* Status chips */
+.chip-st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;padding:3px 9px;border-radius:999px}
+.st-paid{background:var(--ok-soft);color:var(--ok)}
+.st-pending{background:var(--warn-soft);color:var(--warn)}
+.st-failed,.st-declined{background:var(--bad-soft);color:var(--bad)}
+.st-created,.st-other{background:var(--glass-3);color:var(--ink-3)}
+
+/* Inline editor */
+.editor{margin-top:12px;padding:16px;border-radius:var(--r-lg);background:var(--glass-3);
+  border:1px solid var(--glass-edge);animation:up .3s var(--ease)}
+.editor-acts{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+
+/* Add-product panel */
+.panel{padding:18px;border-radius:var(--r-lg);background:var(--glass);
+  backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);
+  border:1px solid var(--glass-line);box-shadow:var(--shadow-md);margin-bottom:16px;animation:up .35s var(--ease)}
+
+/* Login card */
+.login-shell{padding:32px 30px 28px}
+.login-head{text-align:center;margin-bottom:24px}
+.login-ico{width:52px;height:52px;border-radius:16px;margin:0 auto 14px;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(140deg,var(--brand-soft),var(--brand) 45%,var(--brand-deep));
+  box-shadow:0 10px 24px -8px var(--brand);animation:corePop .5s var(--spring)}
+.login-head h1{font-family:var(--f-disp);font-size:21px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px}
+.login-head p{font-size:13.5px;color:var(--ink-3)}
+
+/* Skeleton */
+.skel{height:66px;border-radius:var(--r-lg);background:var(--glass-2);border:1px solid var(--glass-line);
+  position:relative;overflow:hidden;margin-bottom:9px}
+.skel::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,var(--glass-line),transparent);animation:sheen 1.4s linear infinite}
+
+@media(max-width:820px){ .stats{grid-template-columns:1fr 1fr} }
+@media(max-width:560px){
+  .page{padding:24px 14px 70px}
+  .mhead{gap:12px} .mlogo{width:46px;height:46px;font-size:19px} .mtitle h1{font-size:20px}
+  .r-price{font-size:14px}
+  .vtab{padding:8px 13px;font-size:12px}
+}
+</style>
+
+<div class="field"></div>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+<div class="grain"></div>
+
+<nav class="nav">
+  <div class="nav-glass">
+    <a class="brand" href="/">
+      <span class="brand-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4-4 4 4M4 10l4 4 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Agent Commerce
+    </a>
+    <div class="nav-links">
+      <a href="/wallet">Reserve</a>
+      <a href="/agents">Agents</a>
+      <a href="/merchants" class="active">Merchants</a>
+      <a href="/verify">Verify</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Sign in ── -->
+<main class="page narrow" id="login-page">
+  <section class="shell login-shell">
+    <div class="login-head">
+      <div class="login-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="10" width="18" height="11" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M7.5 10V7a4.5 4.5 0 019 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <h1>Merchant sign in</h1>
+      <p>Use the credentials from onboarding.</p>
+    </div>
+    <div class="fg"><div class="float">
+      <input type="text" id="li-id" placeholder=" ">
+      <label for="li-id">Merchant ID or email</label>
+    </div><span class="err" id="li-id-err"></span></div>
+    <div class="fg"><div class="float">
+      <input type="password" id="li-secret" placeholder=" ">
+      <label for="li-secret">Merchant secret</label>
+    </div><span class="err" id="li-secret-err"></span></div>
+    <button class="btn b-primary" id="btn-login" style="width:100%;margin-top:4px">
+      <span id="login-lb">Sign in</span>
+    </button>
+    <p style="text-align:center;margin-top:16px;font-size:13px;color:var(--ink-3)">
+      Not onboarded yet? <a href="/merchants" style="color:var(--brand);font-weight:600;text-decoration:none">Create a merchant account</a>
+    </p>
+  </section>
+</main>
+
+<!-- ── Dashboard ── -->
+<main class="page" id="dash-page" style="display:none">
+  <header class="mhead">
+    <div class="mlogo" id="m-logo">?</div>
+    <div class="mtitle">
+      <h1 id="m-name">—</h1>
+      <div class="mmeta">
+        <span class="badge"><span class="lively"></span>Live</span>
+        <span id="m-cat"></span>
+        <span class="dot-sep"></span>
+        <span id="m-id" style="font-family:var(--f-mono);font-size:11.5px"></span>
+      </div>
+    </div>
+    <button class="btn b-glass b-sm" id="btn-logout">Sign out</button>
+  </header>
+
+  <div class="stats">
+    <div class="stat accent">
+      <div class="stat-lb"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M1.5 5.5h11" stroke="currentColor" stroke-width="1.5"/></svg>Products</div>
+      <div class="stat-v" id="s-products">0</div>
+      <div class="stat-sub">listed in the catalog</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lb"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M2 3h1.5l1.2 6.5h6.1L12 5H4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5.6" cy="11.6" r="1" fill="currentColor"/><circle cx="10.4" cy="11.6" r="1" fill="currentColor"/></svg>Orders</div>
+      <div class="stat-v" id="s-orders">0</div>
+      <div class="stat-sub">placed by agents</div>
+    </div>
+    <div class="stat good">
+      <div class="stat-lb"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1.5v11M4 4h4.2a1.8 1.8 0 010 3.6H4M4 7.6h4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Revenue</div>
+      <div class="stat-v" id="s-revenue">₹0</div>
+      <div class="stat-sub">settled through Razorpay</div>
+    </div>
+    <div class="stat warn">
+      <div class="stat-lb"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M7 4v3.3l2 1.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Awaiting</div>
+      <div class="stat-v" id="s-pending">0</div>
+      <div class="stat-sub">buyer approval</div>
+    </div>
+  </div>
+
+  <div class="vtabs">
+    <button class="vtab on" data-view="catalog">Catalog <span class="cnt" id="t-products">0</span></button>
+    <button class="vtab" data-view="orders">Orders <span class="cnt" id="t-orders">0</span></button>
+  </div>
+
+  <!-- Catalog -->
+  <div class="view on" id="view-catalog">
+    <div class="toolbar">
+      <div class="search">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.8" stroke="currentColor" stroke-width="1.6"/><path d="M10.6 10.6L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <input type="text" id="q" placeholder="Search your products">
+      </div>
+      <button class="btn b-primary b-sm" id="btn-new">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3.5v9M3.5 8h9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+        New product
+      </button>
+    </div>
+
+    <div class="coll" id="new-coll"><div>
+      <div class="panel">
+        <div class="fg"><div class="float">
+          <input type="text" id="n-name" placeholder=" ">
+          <label for="n-name">Product name</label>
+        </div><span class="err" id="n-name-err"></span></div>
+        <div class="grid-2">
+          <div class="fg"><div class="float">
+            <select id="n-category"><option value="" disabled selected></option></select>
+            <label for="n-category">Category</label>
+            <span class="caret"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div></div>
+          <div class="fg">
+            <div class="money" id="m-n-price"><span class="cur">₹</span><input type="number" id="n-price" placeholder="0" min="1" step="1"></div>
+            <span class="err" id="n-price-err"></span>
+          </div>
+        </div>
+        <div class="fg"><div class="float">
+          <input type="text" id="n-desc" placeholder=" ">
+          <label for="n-desc">Short description <span style="opacity:.6">(optional)</span></label>
+        </div></div>
+        <div class="editor-acts">
+          <button class="btn b-quiet b-sm" id="btn-cancel-new" type="button">Cancel</button>
+          <button class="btn b-primary b-sm" id="btn-save-new" type="button">Add to catalog</button>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="rows" id="products"></div>
+  </div>
+
+  <!-- Orders -->
+  <div class="view" id="view-orders">
+    <div class="rows" id="orders"></div>
+  </div>
+</main>
+
+<div class="toast" id="toast"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="toast-msg"></span></div>
+
+<script>
+(function () {
+  'use strict';
+
+  const CATS = {
+    electronics: 'Electronics', fashion: 'Fashion', beauty: 'Beauty & Personal Care',
+    sports: 'Sports & Fitness', home: 'Home & Living', food: 'Food & Grocery',
+    books: 'Books & Media', gaming: 'Gaming', health: 'Health & Wellness',
+    baby: 'Baby & Kids', pets: 'Pets', other: 'Other'
+  };
+
+  const $ = id => document.getElementById(id);
+  const val = id => ($(id).value || '').trim();
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const rupees = paise => '₹' + (paise / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+
+  let token = null, me = null, editing = null;
+
+  let toastT;
+  function toast(msg, isBad) {
+    $('toast-msg').textContent = msg;
+    $('toast').classList.toggle('bad', !!isBad);
+    $('toast').classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => $('toast').classList.remove('show'), 2400);
+  }
+
+  function markBad(id, msg, moneyBox) {
+    const box = moneyBox ? $(moneyBox) : $(id).closest('.float');
+    if (box) { box.classList.add('bad'); setTimeout(() => box.classList.remove('bad'), 420); }
+    const e = $(id + '-err');
+    if (e) { e.textContent = msg; e.style.display = 'block'; }
+    $(id).addEventListener('input', () => { if (e) e.style.display = 'none'; }, { once: true });
+  }
+  const clearErrs = () => document.querySelectorAll('.err').forEach(e => (e.style.display = 'none'));
+
+  const auth = () => ({ 'Content-Type': 'application/json', Authorization: 'Bearer ' + token });
+
+  async function api(path, opts) {
+    const r = await fetch(path, Object.assign({ headers: auth() }, opts || {}));
+    if (r.status === 401) { signOut(); throw new Error('Session expired — sign in again.'); }
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({}));
+      throw new Error(e.detail || 'Request failed.');
+    }
+    return r.json();
+  }
+
+  /* ── Count-up on the stat tiles ── */
+  function countUp(el, target, fmt) {
+    const t0 = performance.now(), dur = 700;
+    (function tick(now) {
+      const p = Math.min((now - t0) / dur, 1);
+      const e = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(Math.round(target * e));
+      if (p < 1) requestAnimationFrame(tick);
+    })(performance.now());
+  }
+
+  /* ── Auth ── */
+  async function signIn(idOrEmail, secret) {
+    const body = idOrEmail.includes('@')
+      ? { email: idOrEmail, merchant_secret: secret }
+      : { merchant_id: idOrEmail, merchant_secret: secret };
+    const r = await fetch('/api/merchants/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({}));
+      throw new Error(e.detail || 'Sign in failed.');
+    }
+    const data = await r.json();
+    token = data.token;
+    try { sessionStorage.setItem('mc_token', token); } catch (e) { /* private mode */ }
+    await load();
+  }
+
+  function signOut() {
+    token = null; me = null;
+    try { sessionStorage.removeItem('mc_token'); } catch (e) { /* ignore */ }
+    $('dash-page').style.display = 'none';
+    $('login-page').style.display = '';
+  }
+
+  /* ── Load ── */
+  async function load() {
+    me = await api('/api/merchant/me');
+    $('login-page').style.display = 'none';
+    $('dash-page').style.display = '';
+
+    const color = me.brand_color || '#2D81F7';
+    $('m-logo').textContent = (me.name || '?')[0].toUpperCase();
+    $('m-logo').style.background = color;
+    $('m-name').textContent = me.name;
+    $('m-cat').textContent = CATS[me.category] || me.category || '';
+    $('m-id').textContent = me.merchant_id;
+
+    countUp($('s-products'), me.stats.products, n => n);
+    countUp($('s-orders'), me.stats.orders, n => n);
+    countUp($('s-revenue'), me.stats.revenue, n => rupees(n));
+    countUp($('s-pending'), me.stats.pending, n => n);
+    $('t-products').textContent = me.stats.products;
+    $('t-orders').textContent = me.stats.orders;
+
+    renderProducts();
+    renderOrders();
+  }
+
+  /* ── Catalog ── */
+  function renderProducts() {
+    const q = val('q').toLowerCase();
+    const list = me.products.filter(p =>
+      !q || p.name.toLowerCase().includes(q) || (p.category || '').toLowerCase().includes(q));
+    const wrap = $('products');
+    if (!list.length) {
+      wrap.innerHTML = me.products.length
+        ? `<div class="msg"><h4>No matches</h4><p>Nothing in your catalog matches “${esc(val('q'))}”.</p></div>`
+        : `<div class="msg">
+             <div class="msg-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M12 21V9" stroke="currentColor" stroke-width="2"/></svg></div>
+             <h4>Your catalog is empty</h4><p>Add a product and it becomes searchable by every agent on the platform.</p>
+           </div>`;
+      return;
+    }
+    const color = me.brand_color || '#2D81F7';
+    wrap.innerHTML = list.map((p, i) => `
+      <div class="row" data-pid="${p.product_id}" style="animation-delay:${Math.min(i, 10) * 0.03}s">
+        <span class="r-thumb" style="background:${color}">${esc(p.name[0].toUpperCase())}</span>
+        <span class="r-body">
+          <span class="r-name">${esc(p.name)}</span>
+          <span class="r-meta">
+            <span>${esc(CATS[p.category] || p.category)}</span>
+            <span class="dot-sep"></span>
+            <span>${esc(p.availability === 'in_stock' ? 'In stock' : p.availability)}</span>
+            ${p.description ? `<span class="dot-sep"></span><span>${esc(p.description.slice(0, 46))}</span>` : ''}
+          </span>
+        </span>
+        <span class="r-price">${rupees(p.price)}</span>
+        <span class="r-acts">
+          <button class="ib" data-edit="${p.product_id}" title="Edit">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M11.2 2.3l2.5 2.5L5.5 13H3v-2.5l8.2-8.2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="ib" data-del="${p.product_id}" title="Delete">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.2h5.8l.6-8.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </span>
+      </div>`).join('');
+
+    wrap.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => openEditor(b.dataset.edit)));
+    wrap.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => removeProduct(b.dataset.del)));
+  }
+
+  function openEditor(pid) {
+    if (editing) closeEditor();
+    const p = me.products.find(x => x.product_id === pid);
+    if (!p) return;
+    const row = document.querySelector(`.row[data-pid="${pid}"]`);
+    const ed = document.createElement('div');
+    ed.className = 'editor';
+    ed.innerHTML = `
+      <div class="fg"><div class="float">
+        <input type="text" id="e-name" placeholder=" " value="${esc(p.name)}">
+        <label for="e-name">Product name</label>
+      </div></div>
+      <div class="grid-2">
+        <div class="fg"><div class="float">
+          <select id="e-category" class="filled">${Object.entries(CATS).map(([k, v]) =>
+            `<option value="${k}"${k === p.category ? ' selected' : ''}>${v}</option>`).join('')}</select>
+          <label for="e-category">Category</label>
+          <span class="caret"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div></div>
+        <div class="fg">
+          <div class="money" id="m-e-price"><span class="cur">₹</span><input type="number" id="e-price" value="${p.price / 100}" min="1" step="1"></div>
+        </div>
+      </div>
+      <div class="fg"><div class="float">
+        <input type="text" id="e-desc" placeholder=" " value="${esc(p.description || '')}">
+        <label for="e-desc">Short description</label>
+      </div></div>
+      <div class="editor-acts">
+        <button class="btn b-quiet b-sm" type="button" id="e-cancel">Cancel</button>
+        <button class="btn b-primary b-sm" type="button" id="e-save">Save changes</button>
+      </div>`;
+    row.after(ed);
+    editing = { pid, el: ed };
+    $('e-name').focus();
+    $('e-cancel').addEventListener('click', closeEditor);
+    $('e-save').addEventListener('click', () => saveEdit(pid));
+  }
+
+  function closeEditor() {
+    if (editing) { editing.el.remove(); editing = null; }
+  }
+
+  async function saveEdit(pid) {
+    const name = val('e-name');
+    const price = parseFloat(val('e-price'));
+    if (name.length < 2) { toast('Product needs a name.', true); return; }
+    if (!price || price < 1) { toast('Price must be at least ₹1.', true); return; }
+    try {
+      await api('/api/merchant/products/' + pid, {
+        method: 'PUT',
+        body: JSON.stringify({
+          name, price, category: val('e-category'), description: val('e-desc')
+        })
+      });
+      closeEditor();
+      await load();
+      toast('Product updated');
+    } catch (e) { toast(e.message, true); }
+  }
+
+  async function removeProduct(pid) {
+    const row = document.querySelector(`.row[data-pid="${pid}"]`);
+    const p = me.products.find(x => x.product_id === pid);
+    if (!confirm(`Remove "${p ? p.name : 'this product'}" from your catalog?`)) return;
+    if (row) row.classList.add('leaving');
+    try {
+      await api('/api/merchant/products/' + pid, { method: 'DELETE' });
+      await load();
+      toast('Product removed');
+    } catch (e) {
+      if (row) row.classList.remove('leaving');
+      toast(e.message, true);
+    }
+  }
+
+  async function addProduct() {
+    clearErrs();
+    const name = val('n-name');
+    const price = parseFloat(val('n-price'));
+    let ok = true;
+    if (name.length < 2) { markBad('n-name', 'Give the product a name.'); ok = false; }
+    if (!price || price < 1) { markBad('n-price', 'Price must be at least ₹1.', 'm-n-price'); ok = false; }
+    if (!ok) return;
+    try {
+      await api('/api/merchant/products', {
+        method: 'POST',
+        body: JSON.stringify({
+          name, price,
+          category: val('n-category') || me.category || 'other',
+          description: val('n-desc')
+        })
+      });
+      ['n-name', 'n-price', 'n-desc'].forEach(id => ($(id).value = ''));
+      $('n-category').value = ''; $('n-category').classList.remove('filled');
+      $('new-coll').classList.remove('open');
+      await load();
+      toast(`"${name}" is live`);
+    } catch (e) { toast(e.message, true); }
+  }
+
+  /* ── Orders ── */
+  function stClass(s) {
+    if (s === 'paid') return 'st-paid';
+    if (s === 'pending_approval') return 'st-pending';
+    if (s === 'failed' || s === 'declined') return 'st-' + s;
+    return 'st-other';
+  }
+
+  function renderOrders() {
+    const wrap = $('orders');
+    if (!me.orders.length) {
+      wrap.innerHTML = `<div class="msg">
+        <div class="msg-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 5h2.5l2 11h11L21 8H6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="19.5" r="1.6" fill="currentColor"/><circle cx="17.5" cy="19.5" r="1.6" fill="currentColor"/></svg></div>
+        <h4>No orders yet</h4><p>Once an agent buys from your catalog, the order shows up here.</p>
+      </div>`;
+      return;
+    }
+    const color = me.brand_color || '#2D81F7';
+    wrap.innerHTML = me.orders.map((o, i) => `
+      <div class="row" style="animation-delay:${Math.min(i, 10) * 0.03}s">
+        <span class="r-thumb" style="background:${color}">${esc((o.product_name || '?')[0].toUpperCase())}</span>
+        <span class="r-body">
+          <span class="r-name">${esc(o.product_name)}</span>
+          <span class="r-meta">
+            <span>${esc(o.buyer_name)}</span>
+            <span class="dot-sep"></span>
+            <span style="font-family:var(--f-mono)">${esc(o.order_id)}</span>
+            ${o.quantity > 1 ? `<span class="dot-sep"></span><span>×${o.quantity}</span>` : ''}
+          </span>
+        </span>
+        <span class="chip-st ${stClass(o.status)}">${esc((o.status || '').replace(/_/g, ' '))}</span>
+        <span class="r-price">${rupees(o.amount)}</span>
+      </div>`).join('');
+  }
+
+  /* ── Init ── */
+  function watchSelect(sel) {
+    const sync = () => sel.classList.toggle('filled', !!sel.value);
+    sel.addEventListener('change', sync);
+    sync();
+  }
+
+  function init() {
+    $('n-category').innerHTML = '<option value="" disabled selected></option>' +
+      Object.entries(CATS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+    document.querySelectorAll('select').forEach(watchSelect);
+
+    $('btn-login').addEventListener('click', async () => {
+      clearErrs();
+      const id = val('li-id'), secret = val('li-secret');
+      let ok = true;
+      if (!id) { markBad('li-id', 'Merchant ID or email required.'); ok = false; }
+      if (!secret) { markBad('li-secret', 'Secret required.'); ok = false; }
+      if (!ok) return;
+      const btn = $('btn-login');
+      btn.disabled = true;
+      $('login-lb').textContent = 'Signing in';
+      try { await signIn(id, secret); }
+      catch (e) { toast(e.message, true); }
+      finally { btn.disabled = false; $('login-lb').textContent = 'Sign in'; }
+    });
+
+    ['li-id', 'li-secret'].forEach(id => $(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); $('btn-login').click(); }
+    }));
+
+    $('btn-logout').addEventListener('click', signOut);
+
+    document.querySelectorAll('.vtab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.vtab').forEach(t => t.classList.remove('on'));
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+        tab.classList.add('on');
+        $('view-' + tab.dataset.view).classList.add('on');
+      });
+    });
+
+    $('btn-new').addEventListener('click', () => {
+      const open = $('new-coll').classList.toggle('open');
+      if (open) $('n-name').focus();
+    });
+    $('btn-cancel-new').addEventListener('click', () => $('new-coll').classList.remove('open'));
+    $('btn-save-new').addEventListener('click', addProduct);
+    ['n-name', 'n-price', 'n-desc'].forEach(id => $(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); addProduct(); }
+    }));
+
+    $('q').addEventListener('input', () => { closeEditor(); renderProducts(); });
+
+    // Straight from onboarding: sign in without making them paste it back.
+    let prefill = null;
+    try { prefill = JSON.parse(sessionStorage.getItem('mc_prefill') || 'null'); } catch (e) { /* ignore */ }
+    if (prefill) {
+      try { sessionStorage.removeItem('mc_prefill'); } catch (e) { /* ignore */ }
+      signIn(prefill.merchant_id, prefill.merchant_secret).catch(() => { /* fall through to the form */ });
+      return;
+    }
+
+    // Returning within the same tab session.
+    let saved = null;
+    try { saved = sessionStorage.getItem('mc_token'); } catch (e) { /* ignore */ }
+    if (saved) {
+      token = saved;
+      load().catch(() => signOut());
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>

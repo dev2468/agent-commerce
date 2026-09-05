@@ -1,0 +1,229 @@
+<title>Verify Agent Passport</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/theme.css">
+
+<style>
+.page{max-width:960px;margin:0 auto;padding:44px 24px 90px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+@media(max-width:820px){ .grid{grid-template-columns:1fr} }
+
+.panel{border-radius:var(--r-xl);padding:22px;background:var(--glass);
+  backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid var(--glass-line);box-shadow:var(--shadow-md);animation:up .5s var(--ease) both}
+.panel h3{font-family:var(--f-disp);font-size:14px;font-weight:800;letter-spacing:.01em;margin-bottom:4px}
+.panel .sub{font-size:12px;color:var(--ink-4);margin-bottom:14px}
+
+.pp-in{width:100%;min-height:230px;resize:vertical;padding:14px;font-family:var(--f-mono);font-size:11.5px;
+  line-height:1.6;color:var(--ink);border-radius:var(--r-md);outline:none;background:var(--glass-2);
+  border:1.5px solid var(--glass-line);transition:border-color .2s,box-shadow .2s}
+.pp-in:focus{border-color:var(--brand);box-shadow:var(--ring)}
+.pp-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+
+.pubkey{display:flex;align-items:center;gap:9px;margin-top:14px;padding:11px 13px;border-radius:var(--r-md);
+  background:var(--glass-3);border:1px solid var(--glass-line)}
+.pubkey svg{color:var(--brand);flex-shrink:0}
+.pubkey div{min-width:0}
+.pubkey b{display:block;font-family:var(--f-disp);font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-4)}
+.pubkey code{font-family:var(--f-mono);font-size:11px;color:var(--ink-2);word-break:break-all}
+
+/* Verdict */
+.verdict{display:flex;align-items:center;gap:14px;padding:18px 20px;border-radius:var(--r-lg);margin-bottom:16px;
+  border:1.5px solid var(--glass-line);animation:up .35s var(--ease)}
+.verdict.ok{background:var(--ok-soft);border-color:transparent;box-shadow:0 0 0 1px var(--ok)}
+.verdict.bad{background:var(--bad-soft);border-color:transparent;box-shadow:0 0 0 1px var(--bad)}
+.verdict-ic{width:48px;height:48px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;color:#fff}
+.verdict.ok .verdict-ic{background:linear-gradient(140deg,var(--ok),#0AA97C);box-shadow:0 8px 20px -8px var(--ok);animation:corePop .5s var(--spring)}
+.verdict.bad .verdict-ic{background:linear-gradient(140deg,var(--bad),#D63B5A);box-shadow:0 8px 20px -8px var(--bad);animation:shake .45s}
+.verdict-ic svg{width:26px;height:26px}
+.verdict-t{font-family:var(--f-disp);font-size:18px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.verdict.ok .verdict-t{color:var(--ok)} .verdict.bad .verdict-t{color:var(--bad)}
+.verdict-s{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.verdict-s code{font-family:var(--f-mono);font-weight:600}
+
+/* Decoded fields */
+.decode{display:flex;flex-direction:column;gap:2px}
+.drow{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:10px 2px;border-bottom:1px solid var(--glass-line)}
+.drow:last-child{border-bottom:none}
+.drow dt{font-size:11.5px;font-weight:600;color:var(--ink-4);flex-shrink:0}
+.drow dd{font-family:var(--f-disp);font-size:13px;font-weight:700;color:var(--ink);text-align:right;
+  font-variant-numeric:tabular-nums;word-break:break-word}
+.drow dd.mono{font-family:var(--f-mono);font-weight:500;font-size:11.5px}
+.drow dd.upi{color:var(--brand)}
+.scope{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.scope span{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--tint);color:var(--brand)}
+.sec-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;
+  background:var(--ok-soft);color:var(--ok);margin-top:2px}
+
+.empty-result{text-align:center;padding:50px 20px;color:var(--ink-4)}
+.empty-result svg{color:var(--ink-4);opacity:.5;margin-bottom:12px}
+.empty-result p{font-size:13px}
+</style>
+
+<div class="field"></div>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+<div class="grain"></div>
+
+<nav class="nav">
+  <div class="nav-glass">
+    <a class="brand" href="/">
+      <span class="brand-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4-4 4 4M4 10l4 4 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Agent Commerce
+    </a>
+    <div class="nav-links">
+      <a href="/user">User</a>
+      <a href="/merchant">Merchant</a>
+      <a href="/verify" class="active">Verify</a>
+      <a href="/upi">UPI</a>
+    </div>
+  </div>
+</nav>
+
+<main class="page">
+  <header class="head">
+    <span class="eyebrow"><span class="pulse"></span>Agent Registry · Ed25519</span>
+    <h1>Is this agent <em>who it says it is?</em></h1>
+    <p>Paste an Agent Passport. We check its signature against the registry's public key and read out exactly what it's allowed to spend — locally, without trusting any server.</p>
+  </header>
+
+  <div class="grid">
+    <!-- Input -->
+    <section class="panel">
+      <h3>Agent Passport</h3>
+      <div class="sub">Paste the signed passport JSON, or load a live one to try it.</div>
+      <textarea class="pp-in" id="pp" placeholder='{ "spec": "acp-1", "agent_id": "...", "signature": "..." }' spellcheck="false"></textarea>
+      <div class="pp-actions">
+        <button class="btn b-primary" id="btn-verify">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Verify
+        </button>
+        <button class="btn b-glass" id="btn-load">Load a live passport</button>
+        <button class="btn b-danger" id="btn-tamper" title="Raise the spend cap after signing">Tamper the cap</button>
+      </div>
+      <div class="pubkey">
+        <svg width="17" height="17" viewBox="0 0 18 18" fill="none"><path d="M11.5 6.5a2.5 2.5 0 10-3.2 2.4L5 12.2V15h2.8l.6-.6v-1.2h1.2l.6-.6v-1.2h1.2l.7-.7a2.5 2.5 0 00-.6-4.6z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="12" cy="6" r=".9" fill="currentColor"/></svg>
+        <div><b>Registry public key</b><code id="pubkey">loading…</code></div>
+      </div>
+    </section>
+
+    <!-- Result -->
+    <section class="panel" id="result-panel">
+      <div class="empty-result" id="empty">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M12 2.5l7.5 3v5c0 4.4-3.1 8.2-7.5 9.5-4.4-1.3-7.5-5.1-7.5-9.5v-5l7.5-3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.5 12l2.3 2.3L15.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p>Verify a passport to see its identity and authority here.</p>
+      </div>
+      <div id="result" hidden></div>
+    </section>
+  </div>
+</main>
+
+<div class="toast" id="toast"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="toast-msg"></span></div>
+
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const rupees = p => '₹' + (p / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  const fmtDate = ms => new Date(ms).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  let toastT;
+  function toast(m, bad) { $('toast-msg').textContent = m; $('toast').classList.toggle('bad', !!bad); $('toast').classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => $('toast').classList.remove('show'), 2400); }
+
+  async function api(p, o) { const r = await fetch(p, o); if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || 'Request failed.'); } return r.json(); }
+
+  function parsed() {
+    try { return JSON.parse($('pp').value); }
+    catch (e) { toast('That is not valid JSON.', true); return null; }
+  }
+
+  async function verify() {
+    const p = parsed();
+    if (!p) return;
+    let res;
+    try { res = await api('/api/registry/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ passport: p }) }); }
+    catch (e) { toast(e.message, true); return; }
+    render(p, res);
+  }
+
+  function render(p, res) {
+    $('empty').hidden = true;
+    const r = $('result'); r.hidden = false;
+
+    const days = p.expires_at_ms ? Math.max(0, Math.round((p.expires_at_ms - Date.now()) / 86400000)) : '—';
+    const cats = (p.categories && p.categories.length)
+      ? `<div class="scope">${p.categories.map(c => `<span>${esc(c)}</span>`).join('')}</div>`
+      : '<dd>All categories</dd>';
+
+    const verdict = res.valid
+      ? `<div class="verdict ok">
+           <div class="verdict-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+           <div><div class="verdict-t">Passport verified</div><div class="verdict-s">Signature valid · issued by ${esc(p.issuer || 'registry')} · not expired, not revoked</div></div>
+         </div>`
+      : `<div class="verdict bad">
+           <div class="verdict-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></div>
+           <div><div class="verdict-t">Refused</div><div class="verdict-s">Reason <code>${esc(res.code)}</code> — ${esc(res.reason)}</div></div>
+         </div>`;
+
+    r.innerHTML = verdict + `
+      <dl class="decode">
+        <div class="drow"><dt>Agent</dt><dd class="mono">${esc(p.agent_id || '—')}</dd></div>
+        <div class="drow"><dt>Passport</dt><dd class="mono">${esc(p.passport_id || '—')}</dd></div>
+        <div class="drow"><dt>Principal</dt><dd>${esc(p.principal_name || '—')}</dd></div>
+        <div class="drow"><dt>Settles from</dt><dd class="upi">${esc(p.principal_vpa || '—')}</dd></div>
+        <div class="drow"><dt>Settlement</dt><dd>${(p.settlement === 'upi') ? '<span class="sec-badge">UPI only</span>' : esc(p.settlement || '—')}</dd></div>
+        <div class="drow"><dt>Per transaction</dt><dd>${p.per_txn_cap != null ? rupees(p.per_txn_cap) : '—'}</dd></div>
+        <div class="drow"><dt>Per day</dt><dd>${p.daily_cap != null ? rupees(p.daily_cap) : '—'}</dd></div>
+        <div class="drow"><dt>Reserve ceiling</dt><dd>${p.reserve_cap != null ? rupees(p.reserve_cap) : '—'}</dd></div>
+        <div class="drow"><dt>Category scope</dt>${cats}</div>
+        <div class="drow"><dt>Issued</dt><dd>${p.issued_at_ms ? fmtDate(p.issued_at_ms) : '—'}</dd></div>
+        <div class="drow"><dt>Expires</dt><dd>${p.expires_at_ms ? fmtDate(p.expires_at_ms) + ' · ' + days + 'd left' : '—'}</dd></div>
+        <div class="drow"><dt>Signature</dt><dd class="mono">${p.signature ? esc(p.signature.slice(0, 24)) + '…' : '—'}</dd></div>
+      </dl>`;
+  }
+
+  async function loadSample() {
+    try {
+      const p = await api('/api/registry/sample');
+      $('pp').value = JSON.stringify(p, null, 2);
+      toast('Loaded a live signed passport');
+      verify();
+    } catch (e) { toast(e.message, true); }
+  }
+
+  function tamper() {
+    const p = parsed();
+    if (!p) { toast('Load a passport first.', true); return; }
+    // Raise the spending cap AFTER it was signed — the classic attack.
+    p.per_txn_cap = (p.per_txn_cap || 0) + 45_000_00;
+    $('pp').value = JSON.stringify(p, null, 2);
+    toast('Raised the cap by ₹45,000 — now re-verify');
+    verify();
+  }
+
+  async function loadAgent(agentId) {
+    try {
+      const r = await api('/api/agents/' + encodeURIComponent(agentId) + '/passport');
+      $('pp').value = JSON.stringify(r.passport, null, 2);
+      toast(r.revoked ? 'Loaded — this agent is revoked' : 'Loaded this agent’s passport');
+      verify();
+    } catch (e) { toast(e.message, true); }
+  }
+
+  async function init() {
+    try { const k = await api('/api/registry/pubkey'); $('pubkey').textContent = k.public_key; }
+    catch (e) { $('pubkey').textContent = '(registry unreachable)'; }
+    $('btn-verify').addEventListener('click', verify);
+    $('btn-load').addEventListener('click', loadSample);
+    $('btn-tamper').addEventListener('click', tamper);
+
+    // Deep link from the console: /verify?agent=agent_xxx pulls that agent's
+    // real passport in, so verifying is one click rather than pasting JSON.
+    const agentId = new URLSearchParams(location.search).get('agent');
+    if (agentId) loadAgent(agentId);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
