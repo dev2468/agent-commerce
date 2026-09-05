@@ -214,6 +214,7 @@
     $('empty').style.display = reqs.length ? 'none' : 'block';
     wrap.innerHTML = reqs.map(r => {
       const rup = Number(r.amount) / 100;
+      const isDirect = (r.payment_model === 'direct' || rup > 10000);
       const c = (r.brand_color && r.brand_color !== '#2D81F7') ? r.brand_color : tint(r.merchant_name || r.merchant_id);
       // Only surface a Razorpay link when one actually came back from the API.
       const link = r.razorpay_short_url
@@ -225,7 +226,7 @@
           <span class="req-mark" style="background:${c}">${esc((r.merchant_name || '?')[0].toUpperCase())}</span>
           <span class="req-who"><b>${esc(r.merchant_name || 'Merchant')}</b><span>via agent ${esc((r.agent_id||'').slice(0,14))}</span></span>
         </div>
-        <div class="req-amt">${rupees(rup)}</div>
+        <div class="req-amt">${rupees(rup)}${isDirect ? `<span style="font-size:10px;font-weight:700;color:var(--warn);background:var(--warn-soft);padding:2px 6px;border-radius:6px;margin-left:8px;vertical-align:middle">Direct UPI (&gt;₹10k)</span>` : ''}</div>
         <div class="req-for">${esc(r.product_name || '')}</div>
         ${link}
         <div class="req-btns">
@@ -315,7 +316,7 @@
         const res = await api('/api/upi/requests/' + r.order_id + '/approve', { method: 'POST' });
         $('pin-ov').classList.remove('on');
         $('done-amt').textContent = 'Paid ' + rupees(Number(r.amount) / 100);
-        $('done-to').textContent = (res.merchant || r.merchant_name || '') + ' · from your reserve';
+        $('done-to').textContent = (res.merchant || r.merchant_name || '') + (res.via === 'direct_upi' || r.payment_model === 'direct' ? ' · via direct UPI' : ' · from your reserve');
         $('pin-done').classList.add('on');
         setTimeout(() => { $('pin-done').classList.remove('on'); active = null; pin = ''; poll(); }, 1900);
       } catch (e) {

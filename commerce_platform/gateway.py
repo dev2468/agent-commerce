@@ -904,7 +904,7 @@ class ChoiceBuy(BaseModel):
     quantity: int = 1
     expected_amount: int | None = None     # integer paise the buyer was shown
     idempotency_key: str = ""
-    autonomous: bool = False
+    autonomous: bool = True
 
 
 @app.post("/api/reserve/buy")

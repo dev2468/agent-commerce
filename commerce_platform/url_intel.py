@@ -221,27 +221,43 @@ def _search(query: str, limit: int, price_max: int = 0) -> list[dict]:
 def compare(url: str, agent_id: str = "", max_price: int = 0) -> dict:
     """Extract the link, then hunt the catalog for it in parallel.
 
-    Three searches at once: the full phrase, the head term (broader), and
-    anything at or under the reference price. Parallel because they are
-    independent and the user is waiting.
+    Searches across: full phrase, tail noun phrase (e.g. 'saffron oil'),
+    individual salient keywords (e.g. 'saffron'), and anything under ceiling.
     """
     ref = extract(url)
     query = ref["query"]
-    head = query.split(" ")[0] if query else ""
+    words = [w for w in query.split() if len(w) >= 3] if query else []
+    head = words[0] if words else ""
+    tail = " ".join(words[-2:]) if len(words) >= 2 else head
     ceiling = max_price or ref["price"] or 0
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
         exact_f = pool.submit(_search, query, 6)
-        similar_f = pool.submit(_search, head, 8)
-        under_f = pool.submit(_search, head, 8, ceiling) if ceiling else None
+        tail_f = pool.submit(_search, tail, 8) if tail and tail != query else None
+        head_f = pool.submit(_search, head, 8) if head and head != tail else None
+        under_f = pool.submit(_search, tail or head, 8, ceiling) if ceiling else None
+
         exact = exact_f.result()
-        similar = similar_f.result()
+        tail_matches = tail_f.result() if tail_f else []
+        similar = head_f.result() if head_f else []
         under = under_f.result() if under_f else []
 
+    # If exact and tail gave nothing, try individual salient words (tail-first)
+    if not exact and not tail_matches and words:
+        for w in reversed(words):
+            if w in (head, tail):
+                continue
+            extra = _search(w, 6, price_max=ceiling)
+            if extra:
+                similar.extend(extra)
+                break
+
     seen, options = set(), []
-    for bucket, rows in (("match", exact), ("cheaper", under), ("similar", similar)):
+    for bucket, rows in (("match", exact), ("match", tail_matches), ("cheaper", under), ("similar", similar)):
         for p in rows:
             if p["product_id"] in seen:
+                continue
+            if max_price > 0 and p["price"] > max_price:
                 continue
             seen.add(p["product_id"])
             saving = (ref["price"] - p["price"]) if ref["price"] else 0

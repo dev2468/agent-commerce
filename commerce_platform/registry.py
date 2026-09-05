@@ -288,8 +288,9 @@ def authorize_purchase(passport: dict, amount_paise: int, merchant_category: str
     if isinstance(amount_paise, bool) or not isinstance(amount_paise, int) or amount_paise <= 0:
         return Decision(False, "amount_invalid", "Amount must be a positive integer in paise.")
 
-    cats = passport.get("categories") or []
-    if cats and (merchant_category or "").strip().lower() not in cats:
+    cats = [c.strip().lower() for c in (passport.get("categories") or []) if c]
+    m_cat = (merchant_category or "").strip().lower()
+    if cats and not any(m_cat == c or m_cat.startswith(c + ".") or c.startswith(m_cat + ".") for c in cats):
         return Decision(False, "out_of_scope",
                         f"Merchant category '{merchant_category}' is outside this passport's scope.")
 

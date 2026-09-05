@@ -1,4 +1,4 @@
-# Demo script — Agent Commerce
+ # Demo script — Agent Commerce
 
 Target: **4–5 minutes**. The argument is one sentence, and every scene proves a
 piece of it:

@@ -33,7 +33,8 @@ def _gate(agent: dict, amount: int, category: str):
 
 
 def _settle(order_id: str, agent: dict, product: dict, amount: int) -> dict:
-    """Move funds reserve -> merchant atomically and mark the order paid."""
+    """Move funds reserve -> merchant atomically, or credit merchant directly on direct UPI."""
+    order = db.get_order(order_id) or {}
     merchant = db.get_merchant(product["merchant_id"])
     merchant_wallet_id = merchant.get("wallet_id")
     if not merchant_wallet_id:
@@ -41,6 +42,30 @@ def _settle(order_id: str, agent: dict, product: dict, amount: int) -> dict:
             owner_type="merchant", owner_name=merchant["name"],
             owner_email=merchant.get("email", ""))
         db.set_merchant_wallet(product["merchant_id"], merchant_wallet_id)
+
+    if order.get("payment_model") == "direct":
+        # Direct UPI payment: collected via 2FA UPI directly to merchant.
+        # Bypass reserve debit; credit merchant wallet directly.
+        credit = db.wallet_credit_merchant(
+            merchant_wallet_id, amount, order_id=order_id,
+            counterparty=agent.get("buyer_name", "Buyer"),
+            note=f"{product['name']} (direct UPI)")
+        if not credit.get("success"):
+            db.update_order(order_id, status="failed", failure_reason=credit.get("error", ""))
+            return {"success": False, "error": credit.get("error", "Direct credit failed")}
+        db.update_order(order_id, status="paid", wallet_txn_id=credit["txn_id"])
+        db.audit("direct_upi_payment", agent["agent_id"], order_id=order_id, amount=amount,
+                 txn_id=credit["txn_id"], merchant=product["merchant_name"])
+        res_w = db.get_wallet(agent.get("wallet_id", "")) or {}
+        return {
+            "success": True, "order_id": order_id, "status": "paid",
+            "txn_id": credit["txn_id"], "product": product["name"],
+            "merchant": product["merchant_name"],
+            "amount": amount / 100, "amount_display": f"₹{amount / 100:,.0f}",
+            "reserve_balance": res_w.get("balance", 0),
+            "reserve_balance_display": f"₹{res_w.get('balance', 0) / 100:,.0f}",
+            "via": "direct_upi",
+        }
 
     transfer = db.wallet_transfer(
         agent["wallet_id"], merchant_wallet_id, amount,
@@ -145,26 +170,42 @@ def pay_from_reserve(agent_id: str, product_id: str, quantity: int = 1,
                     "error": (f"Price changed since the agent chose it: expected "
                               f"₹{expected_amount / 100:,.0f}, now ₹{total_amount / 100:,.0f}.")}
 
-    # 1. Passport gate — signature + RBI bounds, before anything is initiated.
-    decision = _gate(agent, total_amount, product.get("category", ""))
-    db.audit("passport_gate", agent_id, amount=total_amount, product_id=product_id,
-             allowed=decision.allowed, code=decision.code, mode=mode)
-    if not decision.allowed:
-        return {"success": False, "error": decision.reason, "code": decision.code}
+    # An item above ₹10,000 exceeds the UPI Reserve Pay block ceiling.
+    # It cannot be paid autonomously from the reserve. Instead of refusing,
+    # the platform routes it as a direct UPI collect request to the buyer's phone.
+    is_direct = (total_amount > db.RESERVE_CAP)
 
-    # 2. Live spend guards the passport cannot carry (monthly aggregate, velocity).
-    guards = check_spend_guards(agent_id, total_amount)
-    db.audit("spend_guards", agent_id, amount=total_amount,
-             allowed=guards.allowed, checks=guards.checks)
-    if not guards.allowed:
-        return {"success": False, "error": guards.reason, "code": "spend_guard"}
+    if is_direct:
+        mode = "collect"
+        cat = product.get("category", "")
+        allowed_cats = (agent.get("passport") or {}).get("categories") or []
+        if allowed_cats and cat and not any(cat == c or cat.startswith(c + ".") for c in allowed_cats):
+            return {"success": False, "error": f"Category '{cat}' is not in the agent's allowed categories.",
+                    "code": "out_of_scope"}
+        if agent.get("status") != "active":
+            return {"success": False, "error": "Agent is revoked or suspended.", "code": "revoked"}
+    else:
+        # 1. Passport gate — signature + RBI bounds, before anything is initiated.
+        decision = _gate(agent, total_amount, product.get("category", ""))
+        db.audit("passport_gate", agent_id, amount=total_amount, product_id=product_id,
+                 allowed=decision.allowed, code=decision.code, mode=mode)
+        if not decision.allowed:
+            return {"success": False, "error": decision.reason, "code": decision.code}
+
+        # 2. Live spend guards the passport cannot carry (monthly aggregate, velocity).
+        guards = check_spend_guards(agent_id, total_amount)
+        db.audit("spend_guards", agent_id, amount=total_amount,
+                 allowed=guards.allowed, checks=guards.checks)
+        if not guards.allowed:
+            return {"success": False, "error": guards.reason, "code": "spend_guard"}
 
     order_id = f"ord_{uuid.uuid4().hex[:12]}"
+    payment_model = "direct" if is_direct else "reserve"
     try:
         db.create_order(order_id=order_id, agent_id=agent_id, buyer_name=agent["buyer_name"],
                     merchant_id=product["merchant_id"], product_id=product_id,
                     product_name=product["name"], amount=total_amount,
-                    quantity=quantity, payment_model="reserve",
+                    quantity=quantity, payment_model=payment_model,
                     wallet_id=agent["wallet_id"],
                         idempotency_key=idempotency_key, offer_id=offer_id,
                         list_amount=list_total)
@@ -219,6 +260,8 @@ def pay_from_reserve(agent_id: str, product_id: str, quantity: int = 1,
         "order_id": order_id,
         "status": "awaiting_upi_approval",
         "requires": "upi_approval",
+        "is_direct_upi": is_direct,
+        "payment_model": payment_model,
         "product": product["name"],
         "merchant": product["merchant_name"],
         "amount": total_amount / 100,
@@ -228,7 +271,8 @@ def pay_from_reserve(agent_id: str, product_id: str, quantity: int = 1,
         "payment_link_id": link.get("payment_link_id", ""),
         "notified": link.get("notified", {}),
         "razorpay_live": bool(rzp.get("ok")),
-        "message": "Collect request sent to your UPI app — approve it to complete.",
+        "message": ("Item price exceeds ₹10,000 reserve ceiling; direct UPI collect request pushed to phone."
+                    if is_direct else "Collect request sent to your UPI app — approve it to complete."),
     }
 
 
@@ -247,12 +291,19 @@ def complete_upi_request(order_id: str) -> dict:
     if not agent or not product:
         return {"success": False, "error": "Order references a missing agent or product."}
 
-    decision = _gate(agent, order["amount"], product.get("category", ""))
-    if not decision.allowed:
-        db.update_order(order_id, status="failed", failure_reason=decision.reason)
-        db.audit("passport_gate", order["agent_id"], order_id=order_id,
-                 allowed=False, code=decision.code, stage="upi_approval")
-        return {"success": False, "error": decision.reason, "code": decision.code}
+    if order.get("payment_model") != "direct":
+        decision = _gate(agent, order["amount"], product.get("category", ""))
+        if not decision.allowed:
+            db.update_order(order_id, status="failed", failure_reason=decision.reason)
+            db.audit("passport_gate", order["agent_id"], order_id=order_id,
+                     allowed=False, code=decision.code, stage="upi_approval")
+            return {"success": False, "error": decision.reason, "code": decision.code}
+    else:
+        if agent.get("status") != "active":
+            db.update_order(order_id, status="failed", failure_reason="Agent is revoked")
+            db.audit("passport_gate", order["agent_id"], order_id=order_id,
+                     allowed=False, code="revoked", stage="upi_approval")
+            return {"success": False, "error": "Agent is revoked or suspended.", "code": "revoked"}
 
     return _settle(order_id, agent, product, order["amount"])
 
@@ -343,18 +394,28 @@ def settle_from_checkout(order_id: str, payment_id: str, signature: str) -> dict
     if not agent or not product:
         return {"success": False, "error": "Order references a missing agent or product."}
 
-    decision = _gate(agent, order["amount"], product.get("category", ""))
-    if not decision.allowed:
-        # They have already paid Razorpay. Refusing silently would strand real
-        # money, so park it loudly — in production this is a refund.
-        db.update_order(order_id, status="paid_unreconciled",
-                        razorpay_payment_id=payment_id,
-                        failure_reason=f"paid via checkout but refused: {decision.code}")
-        db.audit("checkout_refused_after_payment", order["agent_id"], order_id=order_id,
-                 code=decision.code, payment_id=payment_id)
-        return {"success": False, "code": decision.code, "status": "paid_unreconciled",
-                "error": f"Payment captured but the passport now refuses it "
-                         f"({decision.code}). This needs a refund."}
+    if order.get("payment_model") != "direct":
+        decision = _gate(agent, order["amount"], product.get("category", ""))
+        if not decision.allowed:
+            # They have already paid Razorpay. Refusing silently would strand real
+            # money, so park it loudly — in production this is a refund.
+            db.update_order(order_id, status="paid_unreconciled",
+                            razorpay_payment_id=payment_id,
+                            failure_reason=f"paid via checkout but refused: {decision.code}")
+            db.audit("checkout_refused_after_payment", order["agent_id"], order_id=order_id,
+                     code=decision.code, payment_id=payment_id)
+            return {"success": False, "code": decision.code, "status": "paid_unreconciled",
+                    "error": f"Payment captured but the passport now refuses it "
+                             f"({decision.code}). This needs a refund."}
+    else:
+        if agent.get("status") != "active":
+            db.update_order(order_id, status="paid_unreconciled",
+                            razorpay_payment_id=payment_id,
+                            failure_reason="paid via checkout but agent is revoked")
+            db.audit("checkout_refused_after_payment", order["agent_id"], order_id=order_id,
+                     code="revoked", payment_id=payment_id)
+            return {"success": False, "code": "revoked", "status": "paid_unreconciled",
+                    "error": "Payment captured but the agent passport is revoked. This needs a refund."}
 
     db.update_order(order_id, razorpay_payment_id=payment_id)
     result = _settle(order_id, agent, product, order["amount"])
@@ -419,16 +480,26 @@ def reconcile_order(order_id: str) -> dict:
     if not agent or not product:
         return {"success": False, "error": "Order references a missing agent or product."}
 
-    decision = _gate(agent, order["amount"], product.get("category", ""))
-    if not decision.allowed:
-        db.update_order(order_id, status="paid_unreconciled",
-                        failure_reason=f"paid on Razorpay but refused locally: {decision.code}")
-        db.audit("reconcile_refused_after_payment", order["agent_id"], order_id=order_id,
-                 code=decision.code, payment_id=live.get("payment_id", ""),
-                 amount=order["amount"])
-        return {"success": False, "code": decision.code, "status": "paid_unreconciled",
-                "error": (f"Razorpay took the payment but the passport now refuses it "
-                          f"({decision.code}). This needs a refund.")}
+    if order.get("payment_model") != "direct":
+        decision = _gate(agent, order["amount"], product.get("category", ""))
+        if not decision.allowed:
+            db.update_order(order_id, status="paid_unreconciled",
+                            failure_reason=f"paid on Razorpay but refused locally: {decision.code}")
+            db.audit("reconcile_refused_after_payment", order["agent_id"], order_id=order_id,
+                     code=decision.code, payment_id=live.get("payment_id", ""),
+                     amount=order["amount"])
+            return {"success": False, "code": decision.code, "status": "paid_unreconciled",
+                    "error": (f"Razorpay took the payment but the passport now refuses it "
+                              f"({decision.code}). This needs a refund.")}
+    else:
+        if agent.get("status") != "active":
+            db.update_order(order_id, status="paid_unreconciled",
+                            failure_reason="paid on Razorpay but agent is revoked")
+            db.audit("reconcile_refused_after_payment", order["agent_id"], order_id=order_id,
+                     code="revoked", payment_id=live.get("payment_id", ""),
+                     amount=order["amount"])
+            return {"success": False, "code": "revoked", "status": "paid_unreconciled",
+                    "error": "Paid on Razorpay, but the agent passport is revoked. This needs a refund."}
 
     if live.get("payment_id"):
         db.update_order(order_id, razorpay_payment_id=live["payment_id"])

@@ -445,9 +445,21 @@ def search_products(query: str = "", category: str = "", price_max: int = 0,
     params: list = []
 
     if query:
-        sql += " AND (p.name LIKE ? OR p.description LIKE ? OR p.category LIKE ?)"
-        q = f"%{query}%"
-        params.extend([q, q, q])
+        q = f"%{query.strip()}%"
+        words = [w.strip() for w in query.split() if len(w.strip()) >= 2]
+        if len(words) <= 1:
+            sql += " AND (p.name LIKE ? OR p.description LIKE ? OR p.category LIKE ? OR p.attributes LIKE ?)"
+            params.extend([q, q, q, q])
+        else:
+            clause = "(p.name LIKE ? OR p.description LIKE ? OR p.category LIKE ? OR p.attributes LIKE ?"
+            params.extend([q, q, q, q])
+            word_clauses = []
+            for w in words:
+                qw = f"%{w}%"
+                word_clauses.append("(p.name LIKE ? OR p.description LIKE ? OR p.category LIKE ? OR p.attributes LIKE ?)")
+                params.extend([qw, qw, qw, qw])
+            clause += " OR (" + " AND ".join(word_clauses) + "))"
+            sql += f" AND {clause}"
     if category:
         sql += " AND p.category LIKE ?"
         params.append(f"%{category}%")
@@ -904,6 +916,29 @@ def wallet_transfer(from_wallet_id: str, to_wallet_id: str, amount: int,
             "from_balance_display": f"₹{src_after / 100:,.0f}",
             "to_balance": dst_after,
         }
+    finally:
+        conn.close()
+
+
+def wallet_credit_merchant(wallet_id: str, amount: int, order_id: str = "",
+                           counterparty: str = "", note: str = "") -> dict:
+    """Credit merchant wallet directly on direct UPI payments (bypass reserve debit)."""
+    if amount <= 0:
+        return {"success": False, "error": "Amount must be positive."}
+    conn = _connect()
+    try:
+        conn.execute("BEGIN IMMEDIATE")
+        dst = conn.execute("SELECT * FROM wallets WHERE wallet_id = ?", (wallet_id,)).fetchone()
+        if not dst:
+            conn.rollback()
+            return {"success": False, "error": "Merchant wallet not found."}
+        txn_id = f"txn_{uuid.uuid4().hex[:12]}"
+        dst_after = dst["balance"] + amount
+        conn.execute("UPDATE wallets SET balance = ? WHERE wallet_id = ?", (dst_after, wallet_id))
+        _ledger(conn, wallet_id, "credit", amount, dst_after, "payout", txn_id,
+                counterparty=counterparty, order_id=order_id, note=note)
+        conn.commit()
+        return {"success": True, "txn_id": txn_id, "to_balance": dst_after}
     finally:
         conn.close()
 

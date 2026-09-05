@@ -69,6 +69,32 @@ r4 = payments.pay_from_reserve(aid, pf, 1)
 check("out-of-scope refused before any UPI request", (not r4.get("success")) and r4.get("code") == "out_of_scope")
 
 print("\n" + "=" * 60)
+print("Item > ₹10,000 routes as direct UPI collect (bypasses reserve debit)")
+print("=" * 60)
+prod_high = db.add_product(mid, "Flagship Phone", "pro max", "electronics", 25_000_00)
+bal_before_high = db.get_wallet(res)["balance"]
+m_wallet = db.get_merchant(mid)["wallet_id"]
+m_bal_before = db.get_wallet(m_wallet)["balance"]
+
+# High value item forces direct collect mode even if autonomous requested
+r5 = payments.pay_from_reserve(aid, prod_high, 1, mode="autonomous")
+check("high value routes to awaiting_upi_approval", r5.get("status") == "awaiting_upi_approval")
+check("flagged as is_direct_upi", r5.get("is_direct_upi") is True)
+check("payment_model is direct", r5.get("payment_model") == "direct")
+check("reserve NOT debited at creation", db.get_wallet(res)["balance"] == bal_before_high)
+
+# Buyer approves collect in UPI app
+done5 = payments.complete_upi_request(r5["order_id"])
+check("direct approval settles -> paid", done5.get("success") and done5.get("status") == "paid")
+check("order via is direct_upi", done5.get("via") == "direct_upi")
+check("reserve balance remains untouched", db.get_wallet(res)["balance"] == bal_before_high)
+check("merchant wallet credited with full amount", db.get_wallet(m_wallet)["balance"] - m_bal_before == 25_000_00)
+
+prod_high_fashion = db.add_product(mid, "Designer Bag", "leather", "fashion", 30_000_00)
+r6 = payments.pay_from_reserve(aid, prod_high_fashion, 1)
+check("high-value out-of-scope rejected", (not r6.get("success")) and r6.get("code") == "out_of_scope")
+
+print("\n" + "=" * 60)
 print(f"  RESULT: {ok} passed, {fail} failed")
 print("=" * 60)
 sys.exit(1 if fail else 0)

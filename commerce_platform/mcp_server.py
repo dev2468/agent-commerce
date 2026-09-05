@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
 
-from commerce_platform import db
+from commerce_platform import db, url_intel
 from commerce_platform.policy import get_budget
 from commerce_platform.payments import pay_from_reserve, check_order_status
 
@@ -30,6 +30,20 @@ server = Server("agent-commerce")
 @server.list_tools()
 async def list_tools() -> list[Tool]:
     return [
+        Tool(
+            name="inspect_product_link",
+            description=(
+                "Extract structured product information (title, brand, price benchmark, suggested search keywords) "
+                "from an external product link (e.g. Amazon, Flipkart, H&M) to use as a shopping specification."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "url": {"type": "string", "description": "The external product web URL to inspect"},
+                },
+                "required": ["url"],
+            },
+        ),
         Tool(
             name="search_products",
             description=(
@@ -238,6 +252,19 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                 summary = ", ".join(f"{k}={v}" for k, v in list(details.items())[:4])
                 lines.append(f"- [{e['event_type']}] {summary}")
             return [TextContent(type="text", text="\n".join(lines))]
+
+        elif name == "inspect_product_link":
+            url = arguments.get("url", "").strip()
+            data = url_intel.extract(url)
+            db.audit("link_inspected", AGENT_ID, url=url, title=data.get("title", ""))
+            return [TextContent(type="text", text=json.dumps({
+                "title": data.get("title", ""),
+                "brand": data.get("brand", ""),
+                "reference_price": data.get("price", 0) / 100 if data.get("price") else 0,
+                "reference_price_display": data.get("price_display", ""),
+                "suggested_query": data.get("query", ""),
+                "host": data.get("host", ""),
+            }, indent=2))]
 
         else:
             return [TextContent(type="text", text=f"Unknown tool: {name}")]

@@ -239,8 +239,8 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
       <div class="fg">
         <label class="lb">Autonomous spend, per purchase</label>
         <div class="mandate-read"><b id="mandate-val">₹5,000</b><span>and under — no approval needed</span></div>
-        <input type="range" id="mandate" min="500" max="15000" step="500" value="5000">
-        <p class="hint">RBI caps the no-AFA e-mandate lane at ₹15,000 per transaction. Anything above is refused by the passport.</p>
+        <input type="range" id="mandate" min="500" max="10000" step="500" value="5000">
+        <p class="hint">Capped at ₹10,000 to match the UPI Reserve Pay ceiling. Purchases above ₹10,000 route directly to your phone via UPI.</p>
       </div>
 
       <div class="fg" style="margin-bottom:0">
@@ -288,12 +288,37 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 
       <div class="note"><svg width="17" height="17" viewBox="0 0 18 18" fill="none"><path d="M9 1.8L1.6 15.2h14.8L9 1.8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 6.8v3.4M9 12.6v.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><p><b>Save the secret now.</b> It authenticates the agent and is shown only once.</p></div>
 
-      <div class="sect"><span class="sect-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5.5 4L2 8l3.5 4M10.5 4L14 8l-3.5 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><h3>Wire it up<small>Live calls against this gateway</small></h3></div></div>
-      <div class="tabs"><button class="tab on" data-tab="py">Python</button><button class="tab" data-tab="adk">Google ADK</button></div>
-      <div class="code">
-        <button class="ib" id="btn-copy-code" title="Copy code"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="5.2" y="5.2" width="8" height="8" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M3 10.6V3.6A.6.6 0 013.6 3h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
-        <div class="pane on" id="pane-py"><pre id="code-py"></pre></div>
-        <div class="pane" id="pane-adk"><pre id="code-adk"></pre></div>
+      <div class="sect"><span class="sect-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l5.5 2.2v3.6c0 3.2-2.3 6-5.5 7.2-3.2-1.2-5.5-4-5.5-7.2V3.7L8 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span><div><h3>Agent Passport Credential<small>One-time Ed25519-signed digital export</small></h3></div></div>
+
+      <div class="pass-box" style="background:var(--glass-2);border:1px solid var(--glass-line);border-radius:var(--r-lg);padding:18px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);margin-bottom:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+          <div>
+            <div style="font-family:var(--f-disp);font-size:14px;font-weight:800;color:var(--ink)">Export Verifiable Credential</div>
+            <div style="font-size:11.5px;color:var(--ink-4);margin-top:2px">Cryptographically verifiable by any merchant without trusting this server.</div>
+          </div>
+          <button class="btn b-primary b-sm" id="btn-dl-passport" type="button">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2.5v8M4.5 7.5L8 11l3.5-3.5M3 13.5h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Download passport.json
+          </button>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <button class="btn b-glass b-sm" id="btn-toggle-json" type="button">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8s2.5-4.5 6-4.5S14 8 14 8s-2.5 4.5-6 4.5S2 8 2 8z" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.4"/></svg>
+            <span id="json-toggle-lb">View raw JSON</span>
+          </button>
+          <button class="btn b-glass b-sm" id="btn-copy-json" type="button">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="5.2" y="5.2" width="8" height="8" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M3 10.6V3.6A.6.6 0 013.6 3h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Copy JSON
+          </button>
+          <a class="btn b-glass b-sm" href="/verify" style="margin-left:auto;text-decoration:none">
+            Test on /verify →
+          </a>
+        </div>
+
+        <div class="code" id="passport-json-pane" style="display:none;margin-top:14px;margin-bottom:0;border-radius:var(--r-md);position:relative">
+          <pre id="code-passport" style="max-height:240px;overflow-y:auto;font-size:11px;line-height:1.55"></pre>
+        </div>
       </div>
 
       <div class="hist-head" style="display:flex;align-items:center;gap:9px;margin:22px 0 13px">
@@ -321,7 +346,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 (function () {
   'use strict';
   const STEPS = ['Identity', 'Reserve', 'Agent', 'Live'];
-  const LAST = 2, CAP = 10000, MANDATE_MAX = 15000;
+  const LAST = 2, CAP = 10000, MANDATE_MAX = 10000;
   const CATS = ['electronics','fashion','beauty','sports','home','food','books','gaming','health','baby','pets'];
   const $ = id => document.getElementById(id);
   const val = id => ($(id).value || '').trim();
@@ -453,65 +478,9 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
       <div class="pp-row"><dt>Valid</dt><dd>${days} days</dd></div>
       <div class="pp-row"><dt>Signature</dt><dd class="mono">${p.signature ? esc(p.signature.slice(0, 22)) + '…' : '—'}</dd></div>`;
 
-    const base = location.origin;
-    $('code-py').textContent =
-`import requests
-
-AGENT_ID     = "${agent.agent_id}"
-AGENT_SECRET = "${agent.agent_secret}"
-BASE         = "${base}"
-
-# 1 · authenticate
-token = requests.post(f"{BASE}/agent/v1/auth/token", json={
-    "agent_id": AGENT_ID, "agent_secret": AGENT_SECRET,
-}).json()["token"]
-auth = {"Authorization": f"Bearer {token}"}
-
-# 2 · search every merchant at once
-hits = requests.post(f"{BASE}/agent/v1/search",
-    json={"query": "headphones", "limit": 5}, headers=auth).json()["results"]
-
-# 3 · buy. Default sends a UPI collect request the buyer approves
-#      in their UPI app — nothing is debited until they tap approve.
-order = requests.post(f"{BASE}/agent/v1/orders",
-    json={"product_id": hits[0]["product_id"], "quantity": 1},
-    headers=auth).json()
-
-print(order["status"])        # awaiting_upi_approval`;
-
-    $('code-adk').textContent =
-`import os
-from google.adk.agents import Agent
-from google.adk.tools.mcp_tool.mcp_toolset import (
-    McpToolset, StdioConnectionParams,
-)
-from mcp import StdioServerParameters
-
-os.environ["AGENT_ID"] = "${agent.agent_id}"
-
-# The MCP server holds the credentials and talks to the gateway;
-# the model never sees a secret.
-commerce = McpToolset(connection_params=StdioConnectionParams(
-    server_params=StdioServerParameters(
-        command="python", args=["-m", "commerce_platform.mcp_server"],
-    ),
-    timeout=30,
-))
-
-agent = Agent(
-    model="gemini-2.0-flash",
-    name="shopping_agent",
-    instruction=(
-        "Find products across merchants and compare them. "
-        "Confirm with the user, then buy — the purchase goes to "
-        "their UPI app for approval. Never claim it is paid "
-        "until check_order_status says paid."
-    ),
-    tools=[commerce],
-)
-
-# tools: search_products · get_product_details · purchase_product
-#        check_order_status · check_budget · view_audit_log`;
+    if ($('code-passport') && agent && agent.passport) {
+      $('code-passport').textContent = JSON.stringify(agent.passport, null, 2);
+    }
 
     renderLedger(me.ledger || []);
   }
@@ -590,11 +559,40 @@ agent = Agent(
     $('btn-back').addEventListener('click', () => goTo(cur - 1, 'back'));
     $('btn-next').addEventListener('click', onNext);
 
-    document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
-      document.querySelectorAll('.pane').forEach(p => p.classList.remove('on'));
-      tab.classList.add('on'); $('pane-' + tab.dataset.tab).classList.add('on');
-    }));
+    $('btn-dl-passport').addEventListener('click', () => {
+      if (!agent || !agent.passport) {
+        toast('No passport available to download', true);
+        return;
+      }
+      const data = JSON.stringify(agent.passport, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `passport-${agent.agent_id || 'agent'}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast('passport.json downloaded');
+    });
+
+    let jsonShown = false;
+    $('btn-toggle-json').addEventListener('click', () => {
+      jsonShown = !jsonShown;
+      $('passport-json-pane').style.display = jsonShown ? 'block' : 'none';
+      $('json-toggle-lb').textContent = jsonShown ? 'Hide JSON' : 'View raw JSON';
+    });
+
+    $('btn-copy-json').addEventListener('click', () => {
+      if (!agent || !agent.passport) {
+        toast('No passport available', true);
+        return;
+      }
+      navigator.clipboard.writeText(JSON.stringify(agent.passport, null, 2)).then(() => {
+        toast('Passport JSON copied');
+      });
+    });
 
     let revealedR = false;
     $('d-reveal-r').addEventListener('click', () => {
@@ -615,10 +613,6 @@ agent = Agent(
     $('d-refresh').addEventListener('click', async () => {
       if (!reserve) return;
       try { const me = await api('/api/reserve/me', { headers: { Authorization: 'Bearer ' + reserve.token } }); $('d-balance').textContent = me.balance_display; renderLedger(me.ledger || []); toast('Refreshed'); } catch (e) { toast(e.message, true); }
-    });
-    $('btn-copy-code').addEventListener('click', () => {
-      const pane = document.querySelector('.pane.on pre');
-      if (pane) navigator.clipboard.writeText(pane.textContent).then(() => toast('Snippet copied'));
     });
 
     let existing = null;
