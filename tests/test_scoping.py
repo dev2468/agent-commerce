@@ -5,7 +5,8 @@ request on the platform, with an approve button, in front of anyone who loaded
 the page. These checks exist so that cannot come back.
 """
 import sys
-sys.path.insert(0, r"C:\Users\HP\Desktop\agent-commerce")
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from commerce_platform import db, registry, payments, auth, agent_runner
 
 # Tests must never touch data/agent_commerce.db.

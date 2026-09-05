@@ -3,7 +3,8 @@ vector produces the exact refusal code — security by testing what FAILS."""
 import copy
 import sys
 import time
-sys.path.insert(0, r"C:\Users\HP\Desktop\agent-commerce")
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from commerce_platform import registry as R
 

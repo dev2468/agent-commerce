@@ -5,7 +5,8 @@ click, settling at a price the buyer never saw, honouring a discount nobody
 signed, or making the server fetch its own internals.
 """
 import sys
-sys.path.insert(0, r"C:\Users\HP\Desktop\agent-commerce")
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from commerce_platform import db, registry, payments, auth, offers, url_intel
 
 import tempfile, pathlib as _pl

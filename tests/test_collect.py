@@ -1,6 +1,7 @@
 """UPI collect (default) vs autonomous, proven in the money path."""
 import sys
-sys.path.insert(0, r"C:\Users\HP\Desktop\agent-commerce")
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from commerce_platform import db, registry, payments, auth
 
 # Tests must never touch data/agent_commerce.db — they create merchants and

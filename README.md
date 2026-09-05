@@ -195,12 +195,12 @@ is lying about the interesting part.
 
 ## Tests
 
-**85 checks across five files.** Script-style — no server, no framework, exit non-zero on failure.
+**94 checks across five files.** Script-style — no server, no framework, exit non-zero on failure.
 They write to a scratch database, never the demo one.
 
 ```bash
 venv\Scripts\python.exe tests\test_registry.py        # 23 — the attack matrix
-venv\Scripts\python.exe tests\test_collect.py         # 11 — collect vs autonomous
+venv\Scripts\python.exe tests\test_collect.py         # 20 — collect vs autonomous & high-value UPI
 venv\Scripts\python.exe tests\test_passport_live.py   #  5 — passport in the money path
 venv\Scripts\python.exe tests\test_scoping.py         # 17 — ownership isolation
 venv\Scripts\python.exe tests\test_guardrails.py      # 29 — idempotency, drift, offers, SSRF
