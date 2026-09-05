@@ -26,11 +26,13 @@ credential is.
 ## What this does
 
 - **Issues Agent Passports** — Ed25519-signed, carrying per-transaction cap, daily cap, category
-  scope, settlement rail and expiry.
+  scope (with subcategory hierarchy), settlement rail and expiry. Delivered as downloadable JSON credentials.
 - **Enforces them on every purchase.** The signature is re-verified each time; a passport tampered
   with *in our own database* is refused, and there is a test for exactly that.
-- **Settles over UPI** from a pre-authorized reserve, with per-purchase approval in the buyer's
-  own UPI app by default.
+- **Settles over UPI** from a pre-authorized reserve:
+  - **$\le ₹10,000$**: Autonomous debit straight from the reserve under the user's authorized mandate cap without 2FA interruption.
+  - **$> ₹10,000$**: Automatically routed to the user's phone for direct 2FA UPI approval, bypassing the reserve.
+- **Link intelligence across merchants** — paste an external product URL (Amazon, Nykaa, etc.); the agent inspects the spec in an SSRF-hardened sandbox and searches catalog matches.
 - **Lets merchants sign offers**, so both sides of a transaction carry a verifiable credential:
   the buyer's passport bounds what the agent may spend, the merchant's offer commits the price.
 
@@ -46,35 +48,39 @@ credential is.
    │                                │                              │
    │ 2. register agent ────────────▶│  issue_passport()            │
    │                                │    Ed25519-signed, carries   │
-   │◀── Agent Passport ─────────────│    caps + scope + expiry     │
+   │◀── Agent Passport (JSON) ──────│    caps + scope + expiry     │
    │                                │                              │
-        agent shops ────────────────┼──── search across catalog ──▶│
+        agent shops / inspects link ┼──── search across catalog ──▶│
                                     │                              │
         agent buys                  │                              │
           └─▶ pay_from_reserve() ───┤                              │
                  ├─ registry.authorize_purchase()  ← passport gate │
                  ├─ policy.check_spend_guards()    ← monthly, velocity
-                 └─ default: UPI collect request                   │
-   │◀─── approve in UPI app ────────┤                              │
-                 └─ db.wallet_transfer()   reserve ──▶ merchant payout
+                 │                                                 │
+                 ├─ [≤ ₹10k]: Autonomous Reserve Debit             │
+                 │     └─ db.wallet_transfer() ───────▶ settled    │
+                 │                                                 │
+                 └─ [> ₹10k]: Direct UPI Collect Request           │
+   │◀─── 2FA phone approval ────────┘                              │
+                 └─ settles directly to merchant payout account    │
 ```
 
 ### Two gates, each rule in exactly one place
 
 1. **`registry.authorize_purchase()`** — the passport gate. Signature, expiry, revocation,
-   UPI-only settlement, per-transaction cap, daily cap, category scope. Returns a decision with a
-   stable refusal `code`.
+   UPI-only settlement, per-transaction cap, daily cap, category scope (including subcategory prefixes).
+   Returns a decision with a stable refusal `code`.
 2. **`policy.check_spend_guards()`** — only what a signed credential *cannot* carry because it
    depends on live history: monthly aggregate and velocity (5 orders / 10 min).
 
-### Purchase modes
+### Settlement and Approval Flow
 
-- **`collect`** (default) — pushes a UPI collect request to the buyer's app. The order sits at
-  `awaiting_upi_approval` and **nothing is debited** until they approve.
-- **`autonomous`** — opt-in; settles straight from the reserve with no prompt.
-
-Both run the passport gate at initiation. Collect re-runs it at approval, so authority that
-lapsed in between — expired, revoked, day cap now breached — still stops the payment.
+- **Autonomous Reserve Spend ($\le ₹10,000$)** — Default for agent purchases within the mandate.
+  Consent was established at reserve creation; the agent settles immediately without interrupting the buyer.
+- **Direct Phone 2FA Approval ($> ₹10,000$)** — High-value purchases beyond the RBI single-block
+  limit automatically raise a direct UPI collect request to the buyer's phone. The reserve is untouched;
+  approval settles the payment straight to the merchant.
+- **Manual Collect Mode** — Available when explicit per-purchase approval is desired even under the cap.
 
 ---
 
